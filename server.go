@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net"
 )
@@ -20,8 +19,8 @@ func Listen(address string) {
 
 	defer ln.Close()
 
-	fmt.Printf("listening on UDP %s\n", address)
+	log.Printf("listening on UDP %s\n", address)
 	for {
-		NewConnection(ln)
+		newConnection(ln)
 	}
 }

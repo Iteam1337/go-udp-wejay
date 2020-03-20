@@ -1,79 +1,95 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net"
-	"time"
 
-	"github.com/Iteam1337/go-udp-wejay/message"
+	"github.com/Iteam1337/go-protobuf-wejay/message"
+	"github.com/Iteam1337/go-protobuf-wejay/types"
+	"github.com/Iteam1337/go-udp-wejay/utils"
 	"github.com/golang/protobuf/proto"
 )
 
-func listen(conn *net.UDPConn, addr *net.UDPAddr) {
-	i := 0
-loop:
-	for {
-		if _, err := conn.WriteToUDP([]byte(fmt.Sprintf(">> %d\n", i)), addr); err != nil {
-			continue
-		}
-
-		i = i + 1
-		if i > 3 {
-			break loop
-		} else {
-			time.Sleep(2 * time.Second)
-		}
-	}
-}
-
-func send(msg []byte, conn *net.UDPConn, addr *net.UDPAddr) {
-	if _, err := conn.WriteToUDP([]byte(msg), addr); err != nil {
+func parse(conn *net.UDPConn) (addr *net.UDPAddr, it types.InputType, buffer []byte, err error) {
+	var length int
+	buffer = make([]byte, 4096)
+	length, addr, err = conn.ReadFromUDP(buffer)
+	if err != nil {
 		log.Println(err)
-	}
-}
-
-func sendString(msg string, conn *net.UDPConn, addr *net.UDPAddr) {
-	send([]byte(msg), conn, addr)
-}
-
-// NewConnection …
-func NewConnection(conn *net.UDPConn) {
-	buffer := make([]byte, 4096)
-	length, addr, err := conn.ReadFromUDP(buffer)
-	if err != nil {
-		fmt.Println(err)
 		return
 	}
-	mt, err := NewMessageType(buffer[:2])
+	it, err = inputType(buffer[:2])
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
+		utils.SendEmpty(conn, addr)
+		return
+	}
+	buffer = buffer[2:length]
+	return
+}
+
+func read(msg proto.Message, buf []byte) (err error) {
+	if err = proto.Unmarshal(buf[:], msg); err != nil {
+		log.Println(err)
 		return
 	}
 
-	switch mt.Type {
-	case InputMessage:
-		msg := message.Message{}
-		if err = proto.Unmarshal(buffer[2:length], &msg); err != nil {
-			fmt.Println(err)
-			return
-		}
-		out := message.Message{
-			Text:      fmt.Sprintf("got \"%s\"", msg.Text),
-			Timestamp: time.Now().Unix(),
-		}
-		if data, err := proto.Marshal(&out); err != nil {
-			fmt.Println(err)
-		} else {
-			send(append([]byte{'m', 0}, data...), conn, addr)
-		}
+	return
+}
 
-	case InputListen:
-		listen(conn, addr)
-	case InputPing:
-		send([]byte{'P', 0, '\n'}, conn, addr)
-	case InputPong:
-		send([]byte{'p', 0, '\n'}, conn, addr)
+func convert(it types.InputType, buf []byte) (pb proto.Message) {
+	pb = it.Message()
+	read(pb, buf)
+	return
+}
+
+func newConnection(conn *net.UDPConn) {
+	addr, it, buffer, err := parse(conn)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	switch it {
+	case types.IAction:
+		msg := convert(it, buffer).(*message.Action)
+		log.Println("IAction", msg)
+		utils.SendM(it.Inv(), &message.ActionResponse{
+			UserId: msg.UserId,
+			Ok:     true,
+		}, conn, addr)
+
+	case types.IUserExists:
+		msg := convert(it, buffer).(*message.UserExists)
+		log.Println("IUserExists", msg)
+		utils.SendM(it.Inv(), &message.UserExistsResponse{
+			UserId: msg.UserId,
+			Exists: false,
+			Ok:     true,
+		}, conn, addr)
+
+	case types.INewUser:
+		msg := convert(it, buffer).(*message.NewUser)
+		log.Println("INewUser", msg)
+		utils.SendM(it.Inv(), &message.NewUserResponse{
+			UserId: msg.UserId,
+			Ok:     true,
+		}, conn, addr)
+
+	case types.ICallbackURL:
+		msg := convert(it, buffer).(*message.CallbackURL)
+		log.Println("ICallbackURL", msg)
+		utils.SendM(it.Inv(), &message.CallbackURLResponse{
+			UserId: msg.UserId,
+			Url:    spotifyAuth.AuthURL(msg.UserId),
+			Ok:     true,
+		}, conn, addr)
+
+	case types.IPing:
+		utils.SendM(it.Inv(), &message.Pong{Int: 0}, conn, addr)
+
+	default:
+		utils.SendEmpty(conn, addr)
 	}
 
 }
