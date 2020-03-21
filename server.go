@@ -22,11 +22,37 @@ type connection struct {
 func (c *connection) handleAction() {
 	msg := c.msg.(*message.Action)
 	log.Println("handleAction", msg)
+	id := msg.UserId
 
 	if msg == nil {
 		c.send(&message.ActionResponse{
 			Ok:    false,
 			Error: "could not parse input",
+		})
+		return
+	}
+
+	if exists := user.Exists(id); !exists {
+		c.send(&message.ActionResponse{
+			Ok:    false,
+			Error: "could not find user",
+		})
+		return
+	}
+
+	user, err := user.GetUser(id)
+	if err != nil {
+		c.send(&message.ActionResponse{
+			Ok:    false,
+			Error: err.Error(),
+		})
+		return
+	}
+
+	if err := user.RunAction(msg.Action); err != nil {
+		c.send(&message.ActionResponse{
+			Ok:    false,
+			Error: err.Error(),
 		})
 		return
 	}
