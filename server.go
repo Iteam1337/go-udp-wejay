@@ -174,7 +174,6 @@ func (c connection) convert(it types.InputType, buf []byte) (pb proto.Message) {
 func parseConn(conn *net.UDPConn) (c connection, e error) {
 	addr, it, buffer, err := c.parse(conn)
 	if err != nil {
-		log.Println(err)
 		e = err
 		return
 	}
@@ -188,9 +187,9 @@ func parseConn(conn *net.UDPConn) (c connection, e error) {
 
 func listen(address string) {
 	newConnection := func(c *net.UDPConn) {
-		con, err := parseConn(c)
-		if err != nil {
-			log.Println(err)
+		var con connection
+		var err error
+		if con, err = parseConn(c); err != nil {
 			return
 		}
 

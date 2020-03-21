@@ -8,6 +8,7 @@ import (
 	"github.com/Iteam1337/go-protobuf-wejay/version"
 )
 
+// FromBuffer …
 func FromBuffer(buf []byte) (mt types.InputType, err error) {
 	if len(buf) != 2 {
 		err = fmt.Errorf("wrong buffer length\n expected: 2, got: %d", len(buf))
@@ -15,9 +16,10 @@ func FromBuffer(buf []byte) (mt types.InputType, err error) {
 	}
 
 	v := int8(buf[1])
+	vv := int8(version.Version)
 
-	if v != int8(version.Version) {
-		err = fmt.Errorf("wrong message version\n expected: %d, got: %d", version.Version, v)
+	if v != vv {
+		err = fmt.Errorf("wrong message version\n expected: %d, got: %d", vv, v)
 		return
 	}
 
