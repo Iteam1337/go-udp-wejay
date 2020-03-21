@@ -8,29 +8,34 @@ import (
 	"github.com/golang/protobuf/proto"
 )
 
-func send(msg []byte, conn *net.UDPConn, addr *net.UDPAddr) {
-	if _, err := conn.WriteToUDP([]byte(msg), addr); err != nil {
+func send(msg []byte, conn *net.UDPConn, addr *net.UDPAddr) (err error) {
+	if _, err = conn.WriteToUDP([]byte(msg), addr); err != nil {
 		log.Println(err)
 	}
+	return
 }
 
 // Send …
-func Send(m types.MessageType, msg []byte, conn *net.UDPConn, addr *net.UDPAddr) {
+func Send(m types.MessageType, msg []byte, conn *net.UDPConn, addr *net.UDPAddr) (e error) {
 	b := m.ByteAndVersion()
-	send(append(b[:], msg...), conn, addr)
+	e = send(append(b[:], msg...), conn, addr)
+	return
 }
 
 // SendM …
-func SendM(m types.MessageType, pb proto.Message, conn *net.UDPConn, addr *net.UDPAddr) {
+func SendM(m types.MessageType, pb proto.Message, conn *net.UDPConn, addr *net.UDPAddr) (e error) {
 	b := m.ByteAndVersion()
 	if msg, err := proto.Marshal(pb); err != nil {
+		e = err
 		log.Println(err)
 	} else {
-		send(append(b[:], msg...), conn, addr)
+		e = send(append(b[:], msg...), conn, addr)
 	}
+	return
 }
 
 // SendEmpty …
-func SendEmpty(conn *net.UDPConn, addr *net.UDPAddr) {
-	send([]byte{}, conn, addr)
+func SendEmpty(conn *net.UDPConn, addr *net.UDPAddr) (e error) {
+	e = send([]byte{}, conn, addr)
+	return
 }
