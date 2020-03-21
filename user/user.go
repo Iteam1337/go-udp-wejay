@@ -9,10 +9,17 @@ import (
 	"golang.org/x/oauth2"
 )
 
+// ListenMsg …
+type ListenMsg struct {
+	Type message.ListenResponse_ActionType
+	Meta []byte
+}
+
 // User …
 type User struct {
 	id     string
 	client *spotify.Client
+	listen *chan ListenMsg
 }
 
 func (u *User) getClient() *spotify.Client {
@@ -66,11 +73,20 @@ func (u *User) RunAction(action message.Action_ActionType) (err error) {
 		log.Print(err)
 	}
 
+	if u.listen != nil {
+		*u.listen <- ListenMsg{message.ListenResponse_STATE_CHANGE, []byte{byte(action)}}
+	}
+
 	return
 }
 
+// SetListen …
+func (u *User) SetListen(listen *chan ListenMsg) {
+	u.listen = listen
+}
+
 // NowPlaying …
-func (u User) NowPlaying() (track message.Track, e error) {
+func (u *User) NowPlaying() (track message.Track, e error) {
 	client := u.getClient()
 	currentlyPlaying, err := client.PlayerCurrentlyPlaying()
 	if err != nil {

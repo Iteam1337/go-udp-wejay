@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net"
 
@@ -58,6 +59,39 @@ func (c *connection) handleNowPlaying() {
 	res.Track = &track
 
 	c.send(&res)
+}
+
+func (c *connection) handleListen() {
+	var listen = make(chan user.ListenMsg, 1)
+	msg := c.msg.(*message.Listen)
+	fmt.Println("handleListen", msg)
+	if msg == nil {
+		return
+	}
+
+	id := msg.UserId
+	if exists := user.Exists(id); !exists {
+		return
+	}
+
+	user, err := user.GetUser(id)
+	if err != nil {
+		return
+	}
+
+	user.SetListen(&listen)
+
+	for {
+		msg := <-listen
+
+		res := message.ListenResponse{
+			UserId:     id,
+			ActionType: msg.Type,
+			Meta:       msg.Meta,
+			Ok:         true,
+		}
+		c.send(&res)
+	}
 }
 
 func (c *connection) handleAction() {
@@ -221,22 +255,28 @@ func listen(address string) {
 			return
 		}
 
-		switch con.it {
-		case types.IAction:
-			con.handleAction()
-		case types.IUserExists:
-			con.handleUserExists()
-		case types.INewUser:
-			con.handleNewUser()
-		case types.ICallbackURL:
-			con.handleCallbackURL()
-		case types.IPing:
-			con.handlePing()
-		case types.INowPlaying:
-			con.handleNowPlaying()
-		default:
-			utils.SendEmpty(con.conn, con.addr)
-		}
+		go func() {
+			switch con.it {
+			case types.IAction:
+				con.handleAction()
+			case types.IUserExists:
+				con.handleUserExists()
+			case types.INewUser:
+				con.handleNewUser()
+			case types.ICallbackURL:
+				con.handleCallbackURL()
+			case types.IPing:
+				con.handlePing()
+			case types.INowPlaying:
+				con.handleNowPlaying()
+			case types.IListen:
+				con.handleListen()
+			default:
+				utils.SendEmpty(con.conn, con.addr)
+			}
+		}()
+
+		return
 	}
 
 	udpAddr, err := net.ResolveUDPAddr("udp4", address)
