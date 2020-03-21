@@ -1,11 +1,12 @@
-package user
+package spotifyauth
 
 import (
 	"github.com/Iteam1337/go-udp-wejay/utils"
 	"github.com/zmb3/spotify"
+	"golang.org/x/oauth2"
 )
 
-var spotifyAuth = spotify.NewAuthenticator(
+var auth = spotify.NewAuthenticator(
 	utils.GetEnv("REDIRECT_URL", "http://localhost:8080/callback"),
 	spotify.ScopeUserReadCurrentlyPlaying,
 	spotify.ScopeUserReadPlaybackState,
@@ -14,5 +15,15 @@ var spotifyAuth = spotify.NewAuthenticator(
 
 // AuthURL …
 func AuthURL(id string) string {
-	return spotifyAuth.AuthURL(id)
+	return auth.AuthURL(id)
+}
+
+// NewClient …
+func NewClient(token *oauth2.Token) spotify.Client {
+	return auth.NewClient(token)
+}
+
+// Exchange …
+func Exchange(code string) (*oauth2.Token, error) {
+	return auth.Exchange(code)
 }
