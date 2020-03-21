@@ -128,7 +128,12 @@ func (u *User) boolToByte(b bool) byte {
 
 // SetListen …
 func (u *User) SetListen(listen *chan ListenMsg, close *chan bool) {
+	exists := u.listen != nil
 	u.listen = listen
+
+	if exists {
+		return
+	}
 
 	go func() {
 		for {
@@ -180,7 +185,7 @@ func (u *User) SetListen(listen *chan ListenMsg, close *chan bool) {
 				u.current = current
 			}
 
-			time.Sleep(10 * time.Second)
+			time.Sleep(5 * time.Second)
 		}
 	}()
 }
