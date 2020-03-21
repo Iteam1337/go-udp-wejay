@@ -22,156 +22,140 @@ type connection struct {
 func (c *connection) handleNowPlaying() {
 	msg := c.msg.(*message.NowPlaying)
 	log.Println("handleNowPlaying", msg)
-	id := msg.UserId
+
+	res := message.NowPlayingResponse{Ok: false}
 
 	if msg == nil {
-		c.send(&message.NowPlayingResponse{
-			Ok:    false,
-			Error: "could not parse input",
-		})
+		res.Error = "could not parse input"
+		c.send(&res)
 		return
 	}
 
+	id := msg.UserId
+	res.UserId = id
+
 	if exists := user.Exists(id); !exists {
-		c.send(&message.NowPlayingResponse{
-			Ok:    false,
-			Error: "could not find user",
-		})
+		res.Error = "could not find user"
+		c.send(&res)
 		return
 	}
 
 	user, err := user.GetUser(id)
 	if err != nil {
-		c.send(&message.NowPlayingResponse{
-			Ok:    false,
-			Error: err.Error(),
-		})
+		res.Error = err.Error()
+		c.send(&res)
 		return
 	}
 
-	if track, err := user.NowPlaying(); err != nil {
-		c.send(&message.NowPlayingResponse{
-			Ok:    false,
-			Error: err.Error(),
-		})
-	} else {
-		c.send(&message.NowPlayingResponse{
-			UserId: id,
-			Track:  &track,
-			Ok:     true,
-		})
+	var track message.Track
+	if track, err = user.NowPlaying(); err != nil {
+		res.Error = err.Error()
+		c.send(&res)
+		return
 	}
+
+	res.Ok = true
+	res.Track = &track
+
+	c.send(&res)
 }
 
 func (c *connection) handleAction() {
 	msg := c.msg.(*message.Action)
 	log.Println("handleAction", msg)
-	id := msg.UserId
+
+	res := message.ActionResponse{Ok: false}
 
 	if msg == nil {
-		c.send(&message.ActionResponse{
-			Ok:    false,
-			Error: "could not parse input",
-		})
+		res.Error = "could not parse input"
+		c.send(&res)
 		return
 	}
 
+	id := msg.UserId
+	res.UserId = id
+
 	if exists := user.Exists(id); !exists {
-		c.send(&message.ActionResponse{
-			Ok:    false,
-			Error: "could not find user",
-		})
+		res.Error = "could not find user"
+		c.send(&res)
 		return
 	}
 
 	user, err := user.GetUser(id)
 	if err != nil {
-		c.send(&message.ActionResponse{
-			Ok:    false,
-			Error: err.Error(),
-		})
+		res.Error = err.Error()
+		c.send(&res)
 		return
 	}
 
 	if err := user.RunAction(msg.Action); err != nil {
-		c.send(&message.ActionResponse{
-			Ok:    false,
-			Error: err.Error(),
-		})
+		res.Error = err.Error()
+		c.send(&res)
 		return
 	}
 
-	c.send(&message.ActionResponse{
-		UserId: msg.UserId,
-		Ok:     true,
-	})
+	res.Ok = true
+	c.send(&res)
 }
 
 func (c *connection) handleUserExists() {
 	msg := c.msg.(*message.UserExists)
 	log.Println("handleUserExists", msg)
 
+	res := message.UserExistsResponse{Ok: false}
+
 	if msg == nil {
-		c.send(&message.UserExistsResponse{
-			Ok:    false,
-			Error: "could not parse input",
-		})
+		res.Error = "could not parse input"
+		c.send(&res)
 		return
 	}
 
-	c.send(&message.UserExistsResponse{
-		UserId: msg.UserId,
-		Exists: user.Exists(msg.UserId),
-		Ok:     true,
-	})
+	res.UserId = msg.UserId
+	res.Ok = true
+	res.Exists = user.Exists(msg.UserId)
+
+	c.send(&res)
 }
 
 func (c *connection) handleNewUser() {
 	msg := c.msg.(*message.NewUser)
 	log.Println("handleNewUser", msg)
+	res := message.NewUserResponse{Ok: false}
 
 	if msg == nil {
-		c.send(&message.NewUserResponse{
-			Ok:    false,
-			Error: "could not parse input",
-		})
+		res.Error = "could not parse input"
+		c.send(&res)
 		return
 	}
 
 	id := msg.UserId
+	res.UserId = id
 	if exists := user.Exists(id); exists {
-		c.send(&message.NewUserResponse{
-			UserId: id,
-			Ok:     false,
-			Error:  "user exists",
-		})
+		res.Error = "user exists"
+		c.send(&res)
 		return
 	}
 
 	user.NewUser(id, msg.Code)
-	c.send(&message.NewUserResponse{
-		UserId: id,
-		Ok:     true,
-	})
+	res.Ok = true
+	c.send(&res)
 }
 
 func (c *connection) handleCallbackURL() {
 	msg := c.msg.(*message.CallbackURL)
 	log.Println("handleCallbackURL", msg)
+	res := message.CallbackURLResponse{Ok: false}
 
 	if msg == nil {
-		c.send(&message.CallbackURLResponse{
-			Ok:    false,
-			Error: "could not parse message",
-		})
+		res.Error = "could not parse message"
+		c.send(&res)
 		return
 	}
 
-	c.send(&message.CallbackURLResponse{
-		UserId: msg.UserId,
-		Url:    user.AuthURL(msg.UserId),
-		Ok:     true,
-	})
+	res.UserId = msg.UserId
+	res.Ok = true
+	res.Url = user.AuthURL(msg.UserId)
+	c.send(&res)
 
 }
 
