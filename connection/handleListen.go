@@ -10,6 +10,7 @@ import (
 
 func (c *Connection) handleListen() {
 	var listen = make(chan user.ListenMsg, 1)
+	var close = make(chan bool, 1)
 	msg := c.msg.(*message.Listen)
 	fmt.Println("handleListen", msg)
 	if msg == nil {
@@ -26,16 +27,20 @@ func (c *Connection) handleListen() {
 		return
 	}
 
-	user.SetListen(&listen)
+	user.SetListen(&listen, &close)
 
-	for {
-		msg := <-listen
-		res := message.ListenResponse{
-			UserId: id,
-			Change: msg.Type,
-			Meta:   msg.Meta,
-			Ok:     true,
+	go func() {
+		for {
+			msg := <-listen
+			res := message.ListenResponse{
+				UserId: id,
+				Change: msg.Type,
+				Meta:   msg.Meta,
+				Ok:     true,
+			}
+			c.send(&res)
 		}
-		c.send(&res)
-	}
+	}()
+
+	<-close
 }

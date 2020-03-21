@@ -3,6 +3,7 @@ package user
 import (
 	"errors"
 	"log"
+	"reflect"
 	"strconv"
 	"time"
 
@@ -49,11 +50,36 @@ func (u *User) toggleShuffleState() (state bool, err error) {
 	return
 }
 
+func setNilPtr2(i interface{}) {
+	v := reflect.ValueOf(i)
+	v.Elem().Set(reflect.Zero(v.Elem().Type()))
+}
+
+// Destroy …
+func (u *User) Destroy() {
+	setNilPtr2(&u.id)
+	setNilPtr2(&u.client)
+	setNilPtr2(&u.listen)
+	setNilPtr2(&u.listening)
+	setNilPtr2(&u.active)
+	setNilPtr2(&u.progress)
+	setNilPtr2(&u.current)
+}
+
 // SetClient …
 func (u *User) SetClient(token *oauth2.Token) {
 	client := spotifyauth.NewClient(token)
-
 	u.client = &client
+
+	ps, err := client.PlayerState()
+	if err != nil {
+		return
+	}
+
+	u.listening = ps.Playing
+	u.active = ps.Device.Active
+	u.progress = ps.Progress
+	u.current = string(ps.PlaybackContext.URI)
 }
 
 // RunAction …
@@ -101,14 +127,20 @@ func (u *User) boolToByte(b bool) byte {
 }
 
 // SetListen …
-func (u *User) SetListen(listen *chan ListenMsg) {
+func (u *User) SetListen(listen *chan ListenMsg, close *chan bool) {
 	u.listen = listen
 
 	go func() {
 		for {
+			if u.client == nil {
+				*close <- true
+				break
+			}
+
 			ps, err := u.client.PlayerState()
 			if err != nil {
 				log.Println(err)
+				*close <- true
 				break
 			}
 

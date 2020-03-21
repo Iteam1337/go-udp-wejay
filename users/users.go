@@ -43,5 +43,8 @@ func Exists(id string) bool {
 
 // Delete …
 func Delete(id string) {
-	delete(users, id)
+	if user, ok := users[id]; ok {
+		user.Destroy()
+		delete(users, id)
+	}
 }

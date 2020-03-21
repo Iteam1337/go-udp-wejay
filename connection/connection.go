@@ -72,6 +72,8 @@ func (c *Connection) Handler() {
 			c.handleNowPlaying()
 		case types.IListen:
 			c.handleListen()
+		case types.IDeleteUser:
+			c.handleDeleteUser()
 		default:
 			utils.SendEmpty(c.conn, c.addr)
 		}
