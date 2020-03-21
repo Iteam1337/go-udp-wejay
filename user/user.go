@@ -1,8 +1,8 @@
 package user
 
 import (
+	"errors"
 	"log"
-	"strings"
 
 	"github.com/Iteam1337/go-protobuf-wejay/message"
 	"github.com/zmb3/spotify"
@@ -70,26 +70,33 @@ func (u *User) RunAction(action message.Action_ActionType) (err error) {
 }
 
 // NowPlaying …
-func (u User) NowPlaying() (artist string, track string) {
+func (u User) NowPlaying() (track message.Track, e error) {
 	client := u.getClient()
-
 	currentlyPlaying, err := client.PlayerCurrentlyPlaying()
 	if err != nil {
-		log.Println(err.Error())
+		e = err
 		return
 	}
 
 	item := currentlyPlaying.Item
 	if item == nil {
+		e = errors.New("could not get current item")
 		return
 	}
 
-	var artists []string
-	for _, key := range item.Artists {
-		artists = append(artists, key.Name)
-	}
+	track.Duration = int64(item.Duration)
+	track.Id = item.ID.String()
+	track.Name = item.Name
+	track.Uri = string(item.URI)
 
-	artist = strings.Join(artists, ", ")
-	track = item.SimpleTrack.Name
+	var artists []*message.Artist
+	for _, key := range item.Artists {
+		var artist message.Artist
+		artist.Id = key.ID.String()
+		artist.Name = key.Name
+		artist.Uri = string(key.URI)
+		artists = append(artists, &artist)
+	}
+	track.Artists = artists
 	return
 }

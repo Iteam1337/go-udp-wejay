@@ -19,6 +19,50 @@ type connection struct {
 	msg  proto.Message
 }
 
+func (c *connection) handleNowPlaying() {
+	msg := c.msg.(*message.NowPlaying)
+	log.Println("handleNowPlaying", msg)
+	id := msg.UserId
+
+	if msg == nil {
+		c.send(&message.NowPlayingResponse{
+			Ok:    false,
+			Error: "could not parse input",
+		})
+		return
+	}
+
+	if exists := user.Exists(id); !exists {
+		c.send(&message.NowPlayingResponse{
+			Ok:    false,
+			Error: "could not find user",
+		})
+		return
+	}
+
+	user, err := user.GetUser(id)
+	if err != nil {
+		c.send(&message.NowPlayingResponse{
+			Ok:    false,
+			Error: err.Error(),
+		})
+		return
+	}
+
+	if track, err := user.NowPlaying(); err != nil {
+		c.send(&message.NowPlayingResponse{
+			Ok:    false,
+			Error: err.Error(),
+		})
+	} else {
+		c.send(&message.NowPlayingResponse{
+			UserId: id,
+			Track:  &track,
+			Ok:     true,
+		})
+	}
+}
+
 func (c *connection) handleAction() {
 	msg := c.msg.(*message.Action)
 	log.Println("handleAction", msg)
@@ -204,6 +248,8 @@ func listen(address string) {
 			con.handleCallbackURL()
 		case types.IPing:
 			con.handlePing()
+		case types.INowPlaying:
+			con.handleNowPlaying()
 		default:
 			utils.SendEmpty(con.conn, con.addr)
 		}

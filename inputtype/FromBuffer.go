@@ -39,6 +39,9 @@ func FromBuffer(buf []byte) (mt types.InputType, err error) {
 	case byte(types.IPing):
 		log.Println("new request: Ping")
 		mt = types.IPing
+	case byte(types.INowPlaying):
+		log.Println("new request: NowPlaying")
+		mt = types.INowPlaying
 	default:
 		err = fmt.Errorf("unkown type: %s", string(buf[0]))
 	}
