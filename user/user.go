@@ -1,4 +1,4 @@
-package main
+package user
 
 import (
 	"log"
@@ -11,6 +11,7 @@ import (
 
 // User …
 type User struct {
+	id     string
 	client *spotify.Client
 }
 

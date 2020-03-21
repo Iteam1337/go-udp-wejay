@@ -1,4 +1,4 @@
-package main
+package inputtype
 
 import (
 	"fmt"
@@ -8,7 +8,7 @@ import (
 	"github.com/Iteam1337/go-protobuf-wejay/version"
 )
 
-func inputType(buf []byte) (mt types.InputType, err error) {
+func FromBuffer(buf []byte) (mt types.InputType, err error) {
 	if len(buf) != 2 {
 		err = fmt.Errorf("wrong buffer length\n expected: 2, got: %d", len(buf))
 		return
