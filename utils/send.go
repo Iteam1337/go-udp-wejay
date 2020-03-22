@@ -5,6 +5,7 @@ import (
 	"net"
 
 	"github.com/Iteam1337/go-protobuf-wejay/types"
+
 	"github.com/golang/protobuf/proto"
 )
 

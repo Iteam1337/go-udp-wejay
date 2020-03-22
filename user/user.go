@@ -7,9 +7,11 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/Iteam1337/go-protobuf-wejay/message"
 	"github.com/Iteam1337/go-udp-wejay/spotifyauth"
 	"github.com/Iteam1337/go-udp-wejay/utils"
+
+	"github.com/Iteam1337/go-protobuf-wejay/message"
+
 	"github.com/zmb3/spotify"
 	"golang.org/x/oauth2"
 )
@@ -67,9 +69,8 @@ func (u *User) Destroy() {
 	setNilPtr2(&u.current)
 }
 
-// SetClient …
-func (u *User) SetClient(token *oauth2.Token) {
-	client := spotifyauth.NewClient(token)
+// setClient function is used so that SetClient can be called in tests
+func (u *User) setClient(client spotify.Client) {
 	u.client = &client
 
 	ps, err := client.PlayerState()
@@ -81,6 +82,11 @@ func (u *User) SetClient(token *oauth2.Token) {
 	u.active = ps.Device.Active
 	u.progress = ps.Progress
 	u.current = string(ps.PlaybackContext.URI)
+}
+
+// SetClient …
+func (u *User) SetClient(token *oauth2.Token) {
+	u.setClient(spotifyauth.NewClient(token))
 }
 
 // RunAction …
@@ -119,7 +125,7 @@ func (u *User) RunAction(action message.Action_ActionType) (err error) {
 	return
 }
 
-func (u *User) boolToByte(b bool) byte {
+func (u User) boolToByte(b bool) byte {
 	if b {
 		return byte(1)
 	}

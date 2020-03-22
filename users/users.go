@@ -7,22 +7,26 @@ import (
 	"github.com/Iteam1337/go-udp-wejay/user"
 )
 
-var users = make(map[string]*user.User)
+// Users …
+type Users struct {
+	users       map[string]*user.User
+	spotifyauth spotifyauth.Interface
+}
 
 // GetUser …
-func GetUser(id string) (user *user.User, err error) {
-	if result, ok := users[id]; ok {
+func (u *Users) GetUser(id string) (user *user.User, err error) {
+	if result, ok := u.users[id]; ok {
 		user = result
 	} else {
 		err = fmt.Errorf("cant find %s", id)
 	}
-
 	return
 }
 
 // New …
-func New(id string, code string) {
-	token, err := spotifyauth.Exchange(code)
+func (u *Users) New(id string, code string) {
+	token, err := u.spotifyauth.Exchange(code)
+
 	if err != nil {
 		return
 	}
@@ -30,21 +34,33 @@ func New(id string, code string) {
 	user := user.New(id)
 	user.SetClient(token)
 
-	if _, exists := users[id]; !exists {
-		users[id] = &user
+	if _, exists := u.users[id]; !exists {
+		u.users[id] = &user
 	}
 }
 
 // Exists …
-func Exists(id string) bool {
-	_, ok := users[id]
+func (u Users) Exists(id string) bool {
+	_, ok := u.users[id]
 	return ok
 }
 
 // Delete …
-func Delete(id string) {
-	if user, ok := users[id]; ok {
+func (u *Users) Delete(id string) {
+	if user, ok := u.users[id]; ok {
 		user.Destroy()
-		delete(users, id)
+		delete(u.users, id)
 	}
 }
+
+// Global values
+var (
+	users = Users{
+		users:       make(map[string]*user.User),
+		spotifyauth: spotifyauth.Struct,
+	}
+	GetUser = users.GetUser
+	New     = users.New
+	Exists  = users.Exists
+	Delete  = users.Delete
+)
