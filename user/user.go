@@ -9,6 +9,7 @@ import (
 
 	"github.com/Iteam1337/go-protobuf-wejay/message"
 	"github.com/Iteam1337/go-udp-wejay/spotifyauth"
+	"github.com/Iteam1337/go-udp-wejay/utils"
 	"github.com/zmb3/spotify"
 	"golang.org/x/oauth2"
 )
@@ -185,7 +186,10 @@ func (u *User) SetListen(listen *chan ListenMsg, close *chan bool) {
 				u.current = current
 			}
 
-			time.Sleep(5 * time.Second)
+			waitTime := 5 * time.Second
+			now := time.Now()
+
+			time.Sleep(utils.RoundToNearestSecond(now, waitTime).Sub(now))
 		}
 	}()
 }
