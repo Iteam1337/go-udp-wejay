@@ -1,3 +1,5 @@
+bou.ke/monkey v1.0.2 h1:kWcnsrCNUatbxncxR/ThdYqbytgOIArtYWqcQLQzKLI=
+bou.ke/monkey v1.0.2/go.mod h1:OqickVX3tNx6t33n1xvtTtu85YN5s6cKwVug+oHMaIA=
 cloud.google.com/go v0.34.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=
 github.com/Iteam1337/go-protobuf-wejay v0.0.0-20200321214338-31c4237617d8 h1:c5VHXm5LpszSUsChlziU6NxrxTbOcL+belFe7eICU10=
 github.com/Iteam1337/go-protobuf-wejay v0.0.0-20200321214338-31c4237617d8/go.mod h1:FcQPg/k0jUhidxzCV9gucrx7AiKoyAaQmA65fnQWxKs=

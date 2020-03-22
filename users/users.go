@@ -9,14 +9,14 @@ import (
 
 // Users …
 type Users struct {
-	users       map[string]*user.User
+	users       map[string]user.User
 	spotifyauth spotifyauth.Interface
 }
 
 // GetUser …
 func (u *Users) GetUser(id string) (user *user.User, err error) {
 	if result, ok := u.users[id]; ok {
-		user = result
+		user = &result
 	} else {
 		err = fmt.Errorf("cant find %s", id)
 	}
@@ -35,7 +35,7 @@ func (u *Users) New(id string, code string) {
 	user.SetClient(token)
 
 	if _, exists := u.users[id]; !exists {
-		u.users[id] = &user
+		u.users[id] = user
 	}
 }
 
@@ -56,7 +56,7 @@ func (u *Users) Delete(id string) {
 // Global values
 var (
 	users = Users{
-		users:       make(map[string]*user.User),
+		users:       make(map[string]user.User),
 		spotifyauth: spotifyauth.Struct,
 	}
 	GetUser = users.GetUser

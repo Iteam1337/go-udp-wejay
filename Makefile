@@ -4,7 +4,7 @@
 
 all: test
 test:
-	@go test ./...
+	@go test -gcflags=-l ./...
 
 build: bin
 

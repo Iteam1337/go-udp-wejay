@@ -3,6 +3,7 @@ module github.com/Iteam1337/go-udp-wejay
 go 1.13
 
 require (
+	bou.ke/monkey v1.0.2
 	github.com/Iteam1337/go-protobuf-wejay v0.0.0-20200321214338-31c4237617d8
 	github.com/Iteam1337/go-udp-wejay/mocks v0.0.0-00010101000000-000000000000
 	github.com/golang/protobuf v1.3.5

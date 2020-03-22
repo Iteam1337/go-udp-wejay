@@ -11,3 +11,11 @@ Add a .env (copy contents from .env-template) with your client-id and -secret fr
 ```sh
 go run ./
 ```
+
+**Tests**:
+
+```sh
+go test -gcflags=-l ./...
+# or
+make test
+```

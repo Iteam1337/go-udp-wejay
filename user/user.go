@@ -69,8 +69,9 @@ func (u *User) Destroy() {
 	setNilPtr2(&u.current)
 }
 
-// setClient function is used so that SetClient can be called in tests
-func (u *User) setClient(client spotify.Client) {
+// SetClient …
+func (u *User) SetClient(token *oauth2.Token) {
+	client := spotifyauth.NewClient(token)
 	u.client = &client
 
 	ps, err := client.PlayerState()
@@ -82,11 +83,6 @@ func (u *User) setClient(client spotify.Client) {
 	u.active = ps.Device.Active
 	u.progress = ps.Progress
 	u.current = string(ps.PlaybackContext.URI)
-}
-
-// SetClient …
-func (u *User) SetClient(token *oauth2.Token) {
-	u.setClient(spotifyauth.NewClient(token))
 }
 
 // RunAction …

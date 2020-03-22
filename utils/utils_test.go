@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-func TestRoundToNearestSecond(t *testing.T) {
+func Test_RoundToNearestSecond(t *testing.T) {
 	now := time.Now()
 	interval := 5 * time.Second
 
