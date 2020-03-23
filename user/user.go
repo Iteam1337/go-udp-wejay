@@ -144,7 +144,6 @@ func (u *User) SetListen(listen *chan ListenMsg, close *chan bool) {
 				*close <- true
 				break
 			}
-
 			ps, err := u.client.PlayerState()
 			if err != nil {
 				log.Println(err)
@@ -157,35 +156,49 @@ func (u *User) SetListen(listen *chan ListenMsg, close *chan bool) {
 			listening := ps.Playing
 			if u.listening != listening {
 				m.Meta = []byte{byte(message.ListenResponse_LISTENING), u.boolToByte(listening)}
-				*u.listen <- m
+				if u.listen != nil {
+					*u.listen <- m
+				}
+
 				u.listening = listening
 			}
 
 			active := ps.Device.Active
 			if u.active != active {
 				m.Meta = []byte{byte(message.ListenResponse_ACTIVE), u.boolToByte(active)}
-				*u.listen <- m
+				if u.listen != nil {
+					*u.listen <- m
+				}
 				u.active = active
 			}
 
 			progress := ps.Progress
-			if u.active && u.progress != progress {
+			if u.active && u.progress != progress && u.listen != nil {
 				var buf []byte
 				buf = append(buf, byte(message.ListenResponse_PROGRESS))
 				buf = append(buf, []byte(strconv.Itoa(progress))...)
 				m.Meta = buf
-				*u.listen <- m
+				if u.listen != nil {
+					*u.listen <- m
+				}
 				u.progress = progress
 			}
 
 			current := string(ps.PlaybackContext.URI)
-			if u.current != current {
+			if u.current != current && u.listen != nil {
 				var buf []byte
 				buf = append(buf, byte(message.ListenResponse_CURRENT))
 				buf = append(buf, []byte(current)...)
 				m.Meta = buf
-				*u.listen <- m
+				if u.listen != nil {
+					*u.listen <- m
+				}
 				u.current = current
+			}
+
+			if u.listen == nil {
+				*close <- true
+				break
 			}
 
 			waitTime := 5 * time.Second

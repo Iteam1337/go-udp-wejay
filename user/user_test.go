@@ -3,8 +3,10 @@ package user
 import (
 	"errors"
 	"fmt"
+	"math"
 	"reflect"
 	"testing"
+	"time"
 
 	"bou.ke/monkey"
 	"golang.org/x/oauth2"
@@ -144,5 +146,139 @@ func Test_runActionShuffle(t *testing.T) {
 	if true != <-res {
 		t.Error("new shuffle state should have been `true`")
 		return
+	}
+}
+
+func Test_triggerListenOnActionUpdate(t *testing.T) {
+	listen := make(chan ListenMsg, 1)
+	u := New("x")
+	u.client = &spotify.Client{}
+	u.listen = &listen
+
+	var d *spotify.Client
+	p := monkey.PatchInstanceMethod(reflect.TypeOf(d), "Play", func(*spotify.Client) (e error) {
+		return
+	})
+
+	defer p.Restore()
+
+	go func() { u.RunAction(message.Action_PLAY) }()
+
+	var res ListenMsg
+	timeout := time.After(3 * time.Second)
+
+	select {
+	case <-timeout:
+		t.Fatal("Test didn't finish in time")
+	case res = <-listen:
+	}
+
+	if !res.Ok {
+		t.Error("something broke")
+	}
+
+	expectedMeta := []byte{byte(message.Action_PLAY)}
+	if len(res.Meta) != len(expectedMeta) || res.Meta[0] != expectedMeta[0] {
+		t.Error("wrong meta", res.Meta, expectedMeta)
+	}
+
+	if res.Type != message.ListenResponse_ACTION {
+		t.Error("wrong type", res.Type, message.ListenResponse_ACTION)
+	}
+}
+
+func Test_listenQueriesPlayerstateOnFixedIntervals(t *testing.T) {
+	listen := make(chan ListenMsg, math.MaxInt16)
+	now := make(chan time.Time, math.MaxInt16)
+	playerState := make(chan spotify.PlayerState, 3)
+	close := make(chan bool, 1)
+	u := New("x")
+	u.client = &spotify.Client{}
+
+	// setup fake timer
+	go func() {
+		hour := 13
+		minute := 4
+
+		for {
+			// timer mock is fragile, dont change sec or nanosec
+			now <- time.Date(2020, time.March, 23, hour, minute, 13, 37, time.UTC)
+			if minute+5 > 60 {
+				minute = minute % 60
+				hour = hour + 1
+			} else {
+				minute = minute + 5
+			}
+		}
+	}()
+	// setup listen state
+	go func() {
+		ps := spotify.PlayerState{
+			CurrentlyPlaying: spotify.CurrentlyPlaying{
+				Progress: 1337,
+				Playing:  true,
+				PlaybackContext: spotify.PlaybackContext{
+					URI: "uri://",
+				},
+			},
+			Device: spotify.PlayerDevice{
+				Active: true,
+			},
+		}
+
+		playerState <- ps
+		ps.CurrentlyPlaying.Progress = ps.CurrentlyPlaying.Progress + int(10*time.Second)
+		playerState <- ps
+		ps.CurrentlyPlaying.Progress = ps.CurrentlyPlaying.Progress + int(10*time.Second)
+		playerState <- ps
+	}()
+
+	// monkey patches
+	playerStatesSent := 0
+	var d *spotify.Client
+	monkey.Patch(time.Now, func() time.Time { return <-now })
+	monkey.PatchInstanceMethod(reflect.TypeOf(d), "PlayerState", func(*spotify.Client) (ps *spotify.PlayerState, e error) {
+		state := <-playerState
+		playerStatesSent = playerStatesSent + 1
+		if playerStatesSent < 3 {
+			ps = &state
+		} else {
+			e = errors.New("only send 3 player states")
+			u.Destroy()
+		}
+		return
+	})
+	defer monkey.UnpatchAll()
+
+	u.SetListen(&listen, &close)
+
+	var messages []ListenMsg
+	go func() {
+		for {
+			msg := <-listen
+			messages = append(messages, msg)
+		}
+	}()
+
+	select {
+	case <-time.After(10 * time.Second):
+		t.Fatal("Test should not have taken more than ~4 seconds (one per iteration)")
+	case <-close:
+	}
+
+	if len(messages) != 5 {
+		t.Error("[len(messages)] expected 5 messages, got", len(messages))
+	}
+
+	last := messages[len(messages)-1]
+	expectedByte := byte(message.ListenResponse_PROGRESS)
+	if last.Meta[0] != expectedByte {
+		t.Error("[ListenMsg.Meta[0]] expected", expectedByte, "got", last.Meta[0])
+	}
+
+	for i, msg := range messages {
+		if msg.Type != message.ListenResponse_PLAYBACK {
+			t.Error(i, "[ListenMsg.Type] expected", message.ListenResponse_PLAYBACK, "got", msg.Type)
+		}
 	}
 }
