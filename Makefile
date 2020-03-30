@@ -1,10 +1,12 @@
 .DEFAULT_GOAL := all
 
-.PHONY: all test bin build clean
+.PHONY: all test tests bin build clean
 
 all: test
 test:
 	@go test -gcflags=-l ./...
+
+tests: test
 
 build: bin
 
