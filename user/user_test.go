@@ -162,7 +162,11 @@ func Test_triggerListenOnActionUpdate(t *testing.T) {
 
 	defer p.Restore()
 
-	go func() { u.RunAction(message.Action_PLAY) }()
+	go func() {
+		if err := u.RunAction(message.Action_PLAY); err != nil {
+			t.Error(err)
+		}
+	}()
 
 	var res ListenMsg
 	timeout := time.After(3 * time.Second)
