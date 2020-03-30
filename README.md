@@ -10,6 +10,8 @@ Add a .env (copy contents from .env-template) with your client-id and -secret fr
 
 ```sh
 go run ./
+# or
+modd
 ```
 
 **Tests**:
