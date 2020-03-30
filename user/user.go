@@ -53,20 +53,20 @@ func (u *User) toggleShuffleState() (state bool, err error) {
 	return
 }
 
-func setNilPtr2(i interface{}) {
+func setNil(i interface{}) {
 	v := reflect.ValueOf(i)
 	v.Elem().Set(reflect.Zero(v.Elem().Type()))
 }
 
 // Destroy …
 func (u *User) Destroy() {
-	setNilPtr2(&u.id)
-	setNilPtr2(&u.client)
-	setNilPtr2(&u.listen)
-	setNilPtr2(&u.listening)
-	setNilPtr2(&u.active)
-	setNilPtr2(&u.progress)
-	setNilPtr2(&u.current)
+	setNil(&u.id)
+	setNil(&u.client)
+	setNil(&u.listen)
+	setNil(&u.listening)
+	setNil(&u.active)
+	setNil(&u.progress)
+	setNil(&u.current)
 }
 
 // SetClient …

@@ -12,7 +12,7 @@ var auth = mock.MockSpotifyAuth{}
 
 func Test_CreateNewUser(t *testing.T) {
 	users := Users{
-		users:       make(map[string]user.User),
+		users:       map[string]user.User{},
 		spotifyauth: auth,
 	}
 
@@ -28,7 +28,7 @@ func Test_GetUser(t *testing.T) {
 	var e error
 
 	users := Users{
-		users:       make(map[string]user.User),
+		users:       map[string]user.User{},
 		spotifyauth: auth,
 	}
 
@@ -48,7 +48,7 @@ func Test_GetUser(t *testing.T) {
 
 func Test_DestroyUser(t *testing.T) {
 	users := Users{
-		users:       make(map[string]user.User),
+		users:       map[string]user.User{},
 		spotifyauth: auth,
 	}
 
