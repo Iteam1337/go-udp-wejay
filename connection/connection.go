@@ -19,7 +19,9 @@ type Connection struct {
 }
 
 func (c *Connection) send(r proto.Message) {
-	utils.SendM(c.it.Inv(), r, c.conn, c.addr)
+	if err := utils.SendM(c.it.Inv(), r, c.conn, c.addr); err != nil {
+		log.Println(err)
+	}
 }
 
 func (c Connection) parse(conn *net.UDPConn) (addr *net.UDPAddr, it types.InputType, buffer []byte, err error) {
@@ -33,7 +35,9 @@ func (c Connection) parse(conn *net.UDPConn) (addr *net.UDPAddr, it types.InputT
 	it, err = inputtype.FromBuffer(buffer[:2])
 	if err != nil {
 		log.Println(err)
-		utils.SendEmpty(conn, addr)
+		if err := utils.SendEmpty(conn, addr); err != nil {
+			log.Println(err)
+		}
 		return
 	}
 	buffer = buffer[2:length]
@@ -48,9 +52,9 @@ func (c Connection) read(msg proto.Message, buf []byte) (err error) {
 	return
 }
 
-func (c Connection) convert(it types.InputType, buf []byte) (pb proto.Message) {
+func (c Connection) convert(it types.InputType, buf []byte) (pb proto.Message, e error) {
 	pb = it.Message()
-	c.read(pb, buf)
+	e = c.read(pb, buf)
 	return
 }
 
@@ -58,8 +62,6 @@ func (c Connection) convert(it types.InputType, buf []byte) (pb proto.Message) {
 func (c *Connection) Handler() {
 	go func() {
 		switch c.it {
-		case types.IAction:
-			c.handleAction()
 		case types.IUserExists:
 			c.handleUserExists()
 		case types.INewUser:
@@ -68,14 +70,14 @@ func (c *Connection) Handler() {
 			c.handleCallbackURL()
 		case types.IPing:
 			c.handlePing()
-		case types.INowPlaying:
-			c.handleNowPlaying()
 		case types.IListen:
 			c.handleListen()
 		case types.IDeleteUser:
 			c.handleDeleteUser()
 		default:
-			utils.SendEmpty(c.conn, c.addr)
+			if e := utils.SendEmpty(c.conn, c.addr); e != nil {
+				log.Println(e)
+			}
 		}
 	}()
 }
@@ -91,6 +93,13 @@ func ParseConn(conn *net.UDPConn) (c Connection, e error) {
 	c.conn = conn
 	c.addr = addr
 	c.it = it
-	c.msg = c.convert(it, buffer)
+
+	if msg, err := c.convert(it, buffer); err != nil {
+		e = err
+		return
+	} else {
+		c.msg = msg
+	}
+
 	return
 }

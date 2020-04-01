@@ -1,9 +1,7 @@
 package user
 
 import (
-	"errors"
 	"log"
-	"reflect"
 	"strconv"
 	"time"
 
@@ -53,20 +51,15 @@ func (u *User) toggleShuffleState() (state bool, err error) {
 	return
 }
 
-func setNil(i interface{}) {
-	v := reflect.ValueOf(i)
-	v.Elem().Set(reflect.Zero(v.Elem().Type()))
-}
-
 // Destroy …
 func (u *User) Destroy() {
-	setNil(&u.id)
-	setNil(&u.client)
-	setNil(&u.listen)
-	setNil(&u.listening)
-	setNil(&u.active)
-	setNil(&u.progress)
-	setNil(&u.current)
+	utils.SetNil(&u.id)
+	utils.SetNil(&u.client)
+	utils.SetNil(&u.listen)
+	utils.SetNil(&u.listening)
+	utils.SetNil(&u.active)
+	utils.SetNil(&u.progress)
+	utils.SetNil(&u.current)
 }
 
 // SetClient …
@@ -85,42 +78,6 @@ func (u *User) SetClient(token *oauth2.Token) {
 	if ps.CurrentlyPlaying.Item != nil {
 		u.current = string(ps.CurrentlyPlaying.Item.URI)
 	}
-}
-
-// RunAction …
-func (u *User) RunAction(action message.Action_ActionType) (err error) {
-	client := u.getClient()
-	switch action {
-	case message.Action_PLAY:
-		err = client.Play()
-	case message.Action_PAUSE:
-		err = client.Pause()
-	case message.Action_NEXT:
-		err = client.Next()
-	case message.Action_PREVIOUS:
-		err = client.Previous()
-	case message.Action_SHUFFLE:
-		state, maybeErr := u.toggleShuffleState()
-		if maybeErr != nil {
-			err = maybeErr
-		} else {
-			err = client.Shuffle(state)
-		}
-	}
-
-	if err != nil {
-		log.Print(err)
-	}
-
-	if u.listen != nil {
-		*u.listen <- ListenMsg{
-			message.ListenResponse_ACTION,
-			[]byte{byte(action)},
-			err == nil,
-		}
-	}
-
-	return
 }
 
 // SetListen …
@@ -203,38 +160,6 @@ func (u *User) SetListen(listen *chan ListenMsg, close *chan bool) {
 			time.Sleep(utils.RoundToNearestSecond(now, waitTime).Sub(now))
 		}
 	}()
-}
-
-// NowPlaying …
-func (u *User) NowPlaying() (track message.Track, e error) {
-	client := u.getClient()
-	currentlyPlaying, err := client.PlayerCurrentlyPlaying()
-	if err != nil {
-		e = err
-		return
-	}
-
-	item := currentlyPlaying.Item
-	if item == nil {
-		e = errors.New("could not get current item")
-		return
-	}
-
-	track.Duration = int64(item.Duration)
-	track.Id = item.ID.String()
-	track.Name = item.Name
-	track.Uri = string(item.URI)
-
-	var artists []*message.Artist
-	for _, key := range item.Artists {
-		var artist message.Artist
-		artist.Id = key.ID.String()
-		artist.Name = key.Name
-		artist.Uri = string(key.URI)
-		artists = append(artists, &artist)
-	}
-	track.Artists = artists
-	return
 }
 
 // New …

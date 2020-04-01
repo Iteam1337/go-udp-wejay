@@ -2,7 +2,6 @@ package user
 
 import (
 	"errors"
-	"fmt"
 	"math"
 	"reflect"
 	"testing"
@@ -84,110 +83,6 @@ func Test_setClient(t *testing.T) {
 	}
 
 	defer monkey.UnpatchAll()
-}
-
-func Test_runActions(t *testing.T) {
-	u := New("x")
-	u.client = &spotify.Client{}
-
-	var d *spotify.Client
-	for _, s := range []struct {
-		t message.Action_ActionType
-		m string
-	}{
-		{message.Action_PLAY, "Play"},
-		{message.Action_PAUSE, "Pause"},
-		{message.Action_NEXT, "Next"},
-		{message.Action_PREVIOUS, "Previous"},
-	} {
-
-		err := fmt.Errorf("%s called", s.m)
-
-		p := monkey.PatchInstanceMethod(reflect.TypeOf(d), s.m, func(*spotify.Client) error {
-			return err
-		})
-
-		if e := u.RunAction(s.t); e != err {
-			t.Error(e)
-		}
-
-		defer p.Restore()
-	}
-}
-
-func Test_runActionShuffle(t *testing.T) {
-	u := New("x")
-	u.client = &spotify.Client{}
-	p := spotify.PlayerState{
-		ShuffleState: false,
-	}
-	err := errors.New("Shuffle called last")
-	res := make(chan bool, 1)
-
-	var d *spotify.Client
-	monkey.PatchInstanceMethod(reflect.TypeOf(d), "Shuffle", func(c *spotify.Client, state bool) error {
-		res <- state
-		return err
-	})
-
-	monkey.PatchInstanceMethod(reflect.TypeOf(d), "PlayerState", func(*spotify.Client) (ps *spotify.PlayerState, e error) {
-		ps = &p
-		return
-	})
-
-	defer monkey.UnpatchAll()
-
-	if e := u.RunAction(message.Action_SHUFFLE); e != err {
-		t.Error(e)
-		return
-	}
-
-	if true != <-res {
-		t.Error("new shuffle state should have been `true`")
-		return
-	}
-}
-
-func Test_triggerListenOnActionUpdate(t *testing.T) {
-	listen := make(chan ListenMsg, 1)
-	u := New("x")
-	u.client = &spotify.Client{}
-	u.listen = &listen
-
-	var d *spotify.Client
-	p := monkey.PatchInstanceMethod(reflect.TypeOf(d), "Play", func(*spotify.Client) (e error) {
-		return
-	})
-
-	defer p.Restore()
-
-	go func() {
-		if err := u.RunAction(message.Action_PLAY); err != nil {
-			t.Error(err)
-		}
-	}()
-
-	var res ListenMsg
-	timeout := time.After(3 * time.Second)
-
-	select {
-	case <-timeout:
-		t.Fatal("Test didn't finish in time")
-	case res = <-listen:
-	}
-
-	if !res.Ok {
-		t.Error("something broke")
-	}
-
-	expectedMeta := []byte{byte(message.Action_PLAY)}
-	if len(res.Meta) != len(expectedMeta) || res.Meta[0] != expectedMeta[0] {
-		t.Error("wrong meta", res.Meta, expectedMeta)
-	}
-
-	if res.Type != message.ListenResponse_ACTION {
-		t.Error("wrong type", res.Type, message.ListenResponse_ACTION)
-	}
 }
 
 func Test_listenQueriesPlayerstateOnFixedIntervals(t *testing.T) {
