@@ -33,15 +33,14 @@ func Test_setClient(t *testing.T) {
 	}
 
 	c := spotify.Client{}
+	item := spotify.FullTrack{}
+	item.URI = "uri://"
 	p := spotify.PlayerState{
 		CurrentlyPlaying: spotify.CurrentlyPlaying{
 			Timestamp: 0,
 			Progress:  1337,
 			Playing:   true,
-			Item:      &spotify.FullTrack{},
-			PlaybackContext: spotify.PlaybackContext{
-				URI: "uri://",
-			},
+			Item:      &item,
 		},
 		Device: spotify.PlayerDevice{
 			Active: true,
@@ -217,6 +216,9 @@ func Test_listenQueriesPlayerstateOnFixedIntervals(t *testing.T) {
 	}()
 	// setup listen state
 	go func() {
+		item := spotify.FullTrack{}
+		item.URI = "uri://"
+
 		ps := spotify.PlayerState{
 			CurrentlyPlaying: spotify.CurrentlyPlaying{
 				Progress: 1337,
@@ -224,6 +226,7 @@ func Test_listenQueriesPlayerstateOnFixedIntervals(t *testing.T) {
 				PlaybackContext: spotify.PlaybackContext{
 					URI: "uri://",
 				},
+				Item: &item,
 			},
 			Device: spotify.PlayerDevice{
 				Active: true,

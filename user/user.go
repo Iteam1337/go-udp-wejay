@@ -82,7 +82,9 @@ func (u *User) SetClient(token *oauth2.Token) {
 	u.listening = ps.Playing
 	u.active = ps.Device.Active
 	u.progress = ps.Progress
-	u.current = string(ps.PlaybackContext.URI)
+	if ps.CurrentlyPlaying.Item != nil {
+		u.current = string(ps.CurrentlyPlaying.Item.URI)
+	}
 }
 
 // RunAction …
@@ -121,14 +123,6 @@ func (u *User) RunAction(action message.Action_ActionType) (err error) {
 	return
 }
 
-func (u User) boolToByte(b bool) byte {
-	if b {
-		return byte(1)
-	}
-
-	return byte(0)
-}
-
 // SetListen …
 func (u *User) SetListen(listen *chan ListenMsg, close *chan bool) {
 	exists := u.listen != nil
@@ -155,7 +149,7 @@ func (u *User) SetListen(listen *chan ListenMsg, close *chan bool) {
 
 			listening := ps.Playing
 			if u.listening != listening {
-				m.Meta = []byte{byte(message.ListenResponse_LISTENING), u.boolToByte(listening)}
+				m.Meta = []byte{byte(message.ListenResponse_LISTENING), utils.BoolToByte(listening)}
 				if u.listen != nil {
 					*u.listen <- m
 				}
@@ -165,7 +159,7 @@ func (u *User) SetListen(listen *chan ListenMsg, close *chan bool) {
 
 			active := ps.Device.Active
 			if u.active != active {
-				m.Meta = []byte{byte(message.ListenResponse_ACTIVE), u.boolToByte(active)}
+				m.Meta = []byte{byte(message.ListenResponse_ACTIVE), utils.BoolToByte(active)}
 				if u.listen != nil {
 					*u.listen <- m
 				}
@@ -184,16 +178,18 @@ func (u *User) SetListen(listen *chan ListenMsg, close *chan bool) {
 				u.progress = progress
 			}
 
-			current := string(ps.PlaybackContext.URI)
-			if u.current != current && u.listen != nil {
-				var buf []byte
-				buf = append(buf, byte(message.ListenResponse_CURRENT))
-				buf = append(buf, []byte(current)...)
-				m.Meta = buf
-				if u.listen != nil {
-					*u.listen <- m
+			if ps.CurrentlyPlaying.Item != nil {
+				current := string(ps.CurrentlyPlaying.Item.URI)
+				if u.current != current && u.listen != nil {
+					var buf []byte
+					buf = append(buf, byte(message.ListenResponse_CURRENT))
+					buf = append(buf, []byte(current)...)
+					m.Meta = buf
+					if u.listen != nil {
+						*u.listen <- m
+					}
+					u.current = current
 				}
-				u.current = current
 			}
 
 			if u.listen == nil {
