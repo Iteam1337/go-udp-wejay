@@ -27,9 +27,6 @@ func FromBuffer(buf []byte) (mt types.InputType, err error) {
 	case byte(types.IUserExists):
 		log.Println("new request: UserExists")
 		mt = types.IUserExists
-	case byte(types.IAction):
-		log.Println("new request: Action")
-		mt = types.IAction
 	case byte(types.INewUser):
 		log.Println("new request: NewUser")
 		mt = types.INewUser
@@ -39,9 +36,6 @@ func FromBuffer(buf []byte) (mt types.InputType, err error) {
 	case byte(types.IPing):
 		log.Println("new request: Ping")
 		mt = types.IPing
-	case byte(types.INowPlaying):
-		log.Println("new request: NowPlaying")
-		mt = types.INowPlaying
 	case byte(types.IListen):
 		log.Println("new request: Listen")
 		mt = types.IListen
