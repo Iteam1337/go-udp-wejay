@@ -36,8 +36,6 @@ func FromBuffer(buf []byte) (mt types.InputType, err error) {
 		mt = types.IRoomExists
 	case byte(types.IJoinRoom):
 		mt = types.IJoinRoom
-	case byte(types.ILeaveRoom):
-		mt = types.ILeaveRoom
 	case byte(types.IQueryRooms):
 		mt = types.IQueryRooms
 	case byte(types.IUserLeaveRoom):

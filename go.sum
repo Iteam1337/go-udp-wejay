@@ -5,6 +5,8 @@ github.com/Iteam1337/go-protobuf-wejay v0.0.0-20200402133023-769d7cc209b9 h1:rN+
 github.com/Iteam1337/go-protobuf-wejay v0.0.0-20200402133023-769d7cc209b9/go.mod h1:FcQPg/k0jUhidxzCV9gucrx7AiKoyAaQmA65fnQWxKs=
 github.com/Iteam1337/go-protobuf-wejay v0.0.0-20200402170234-1858eb319d05 h1:3mP1oWWXojT4bM9vbNq626PSiousbfoTpVN6hASq3XM=
 github.com/Iteam1337/go-protobuf-wejay v0.0.0-20200402170234-1858eb319d05/go.mod h1:FcQPg/k0jUhidxzCV9gucrx7AiKoyAaQmA65fnQWxKs=
+github.com/Iteam1337/go-protobuf-wejay v0.0.0-20200402182100-ae840c8f2f69 h1:79iw9HnnsKxhggDrhmImJS4uG5Fo4n2Wvso0AtCDJKk=
+github.com/Iteam1337/go-protobuf-wejay v0.0.0-20200402182100-ae840c8f2f69/go.mod h1:FcQPg/k0jUhidxzCV9gucrx7AiKoyAaQmA65fnQWxKs=
 github.com/golang/protobuf v1.2.0/go.mod h1:6lQm79b+lXiMfvg/cZm0SGofjICqVBUtrP5yJMmIC1U=
 github.com/golang/protobuf v1.3.5 h1:F768QJ1E9tib+q5Sc8MkdJi1RxLTbRcTf8LJV56aRls=
 github.com/golang/protobuf v1.3.5/go.mod h1:6O5/vntMXwX2lRkT1hjjk0nAC1IDOTvTlVgjlRvqsdk=

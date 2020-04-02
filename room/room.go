@@ -16,6 +16,11 @@ func (r *Room) Evict(userID string) (id string, empty bool) {
 	id = r.id
 	empty = len(r.users) == 0
 
+	u, err := users.GetUser(userID)
+	if u != nil && err == nil {
+		u.Room = ""
+	}
+
 	return
 }
 

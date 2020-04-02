@@ -72,8 +72,6 @@ func (c *Connection) Handler() {
 			c.handleDeleteUser()
 		case types.IJoinRoom:
 			c.handleJoinRoom()
-		case types.ILeaveRoom:
-			c.handleLeaveRoom()
 		case types.IQueryRooms:
 			c.handleQueryRooms()
 		case types.IRoomExists:

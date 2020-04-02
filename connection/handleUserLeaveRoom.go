@@ -10,9 +10,8 @@ import (
 
 func (c *Connection) handleUserLeaveRoom() {
 	msg := c.msg.(*message.UserLeaveRoom)
-	log.Println("handleUserLeaveRoom", msg)
-
 	res := message.UserLeaveRoomResponse{Ok: false}
+	log.Println("handleUserLeaveRoom", msg)
 
 	if msg == nil {
 		res.Error = "could not parse input"
@@ -26,17 +25,8 @@ func (c *Connection) handleUserLeaveRoom() {
 		return
 	}
 
-	user, _ := users.GetUser(msg.UserId)
-	ex := rooms.Get(user.Room)
-
-	if ex != nil {
-		id, empty := ex.Evict(msg.UserId)
-		if empty {
-			rooms.Delete(id)
-		}
-
+	if ok := rooms.Evict(msg.UserId); ok {
 		res.UserId = msg.UserId
-
 		res.Ok = true
 	}
 
