@@ -5,6 +5,8 @@ github.com/Iteam1337/go-protobuf-wejay v0.0.0-20200321214338-31c4237617d8 h1:c5V
 github.com/Iteam1337/go-protobuf-wejay v0.0.0-20200321214338-31c4237617d8/go.mod h1:FcQPg/k0jUhidxzCV9gucrx7AiKoyAaQmA65fnQWxKs=
 github.com/Iteam1337/go-protobuf-wejay v0.0.0-20200402113946-3300d9f3bff5 h1:GhxRXT4uvHGI4wkTs0jTTSVv/A+0zi3BsidlerbNh2E=
 github.com/Iteam1337/go-protobuf-wejay v0.0.0-20200402113946-3300d9f3bff5/go.mod h1:FcQPg/k0jUhidxzCV9gucrx7AiKoyAaQmA65fnQWxKs=
+github.com/Iteam1337/go-protobuf-wejay v0.0.0-20200402122254-9edb1cf8393a h1:L5E5fMLxjhUNKWA4utbpcK3QkIuy84NuwLHitlGzELo=
+github.com/Iteam1337/go-protobuf-wejay v0.0.0-20200402122254-9edb1cf8393a/go.mod h1:FcQPg/k0jUhidxzCV9gucrx7AiKoyAaQmA65fnQWxKs=
 github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751 h1:JYp7IbQjafoB+tBA3gMyHYHrpOtNuDiK/uB5uXxq5wM=
 github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751/go.mod h1:LOuyumcjzFXgccqObfd/Ljyb9UuFJ6TxHnclSeseNhc=
 github.com/alecthomas/units v0.0.0-20190924025748-f65c72e2690d h1:UQZhZ2O0vMHr2cI+DC1Mbh0TJxzA3RcLoMsFw+aXw7E=

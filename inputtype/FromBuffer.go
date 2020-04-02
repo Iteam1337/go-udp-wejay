@@ -24,21 +24,21 @@ func FromBuffer(buf []byte) (mt types.InputType, err error) {
 	}
 
 	switch buf[0] {
+	case byte(types.ICallbackURL):
+		log.Println("new request: CallbackURL")
+		mt = types.ICallbackURL
 	case byte(types.IUserExists):
 		log.Println("new request: UserExists")
 		mt = types.IUserExists
 	case byte(types.INewUser):
 		log.Println("new request: NewUser")
 		mt = types.INewUser
-	case byte(types.ICallbackURL):
-		log.Println("new request: CallbackURL")
-		mt = types.ICallbackURL
-	case byte(types.IPing):
-		log.Println("new request: Ping")
-		mt = types.IPing
 	case byte(types.IDeleteUser):
 		log.Println("new request: DeleteUser")
 		mt = types.IDeleteUser
+	case byte(types.IPing):
+		log.Println("new request: Ping")
+		mt = types.IPing
 	default:
 		err = fmt.Errorf("unkown type: %s", string(buf[0]))
 	}

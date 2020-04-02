@@ -72,6 +72,12 @@ func (c *Connection) Handler() {
 			c.handlePing()
 		case types.IDeleteUser:
 			c.handleDeleteUser()
+		case types.IJoinRoom:
+			c.handleJoinRoom()
+		case types.ILeaveRoom:
+			c.handleLeaveRoom()
+		case types.IQueryRooms:
+			c.handleQueryRooms()
 		default:
 			if e := utils.SendEmpty(c.conn, c.addr); e != nil {
 				log.Println(e)
