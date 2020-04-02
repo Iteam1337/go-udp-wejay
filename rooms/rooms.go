@@ -1,19 +1,45 @@
 package rooms
 
-import "github.com/Iteam1337/go-udp-wejay/room"
+import (
+	"github.com/Iteam1337/go-udp-wejay/room"
+	"github.com/Iteam1337/go-udp-wejay/users"
+)
 
-// Rooms …
 type Rooms struct {
-	rooms map[string]room.Room
+	rooms map[string]*room.Room
 }
 
-// Get …
-func (r *Rooms) Get(id string) {}
+func (r *Rooms) Get(id string) (room *room.Room) {
+	if res, ok := r.rooms[id]; ok {
+		room = res
+	}
+	return
+}
 
-// Add …
-func (r *Rooms) Add(userId string, id string) {}
+func (r *Rooms) Add(userID string, id string) (out room.Room, ok bool) {
+	user, _ := users.GetUser(userID)
+	ex := rooms.Get(user.Room)
 
-// Exists …
+	if ex != nil {
+		if id, empty := ex.Evict(userID); empty {
+			delete(r.rooms, id)
+		}
+	}
+
+	if res, ok := r.rooms[id]; ok {
+		res.Add(userID)
+		out = *res
+	} else {
+		out = room.New(id, userID)
+	}
+
+	if out.Size() > 0 {
+		ok = true
+	}
+
+	return
+}
+
 func (r *Rooms) Exists(id string) bool {
 	if _, ok := r.rooms[id]; ok {
 		return true
@@ -22,15 +48,13 @@ func (r *Rooms) Exists(id string) bool {
 	return false
 }
 
-// Delete …
 func (r *Rooms) Delete(id string) {
 	delete(r.rooms, id)
 }
 
-// Global values
 var (
 	rooms = Rooms{
-		rooms: make(map[string]room.Room),
+		rooms: make(map[string]*room.Room),
 	}
 	Get    = rooms.Get
 	Add    = rooms.Add

@@ -6,7 +6,6 @@ import (
 	"time"
 )
 
-// RoundToNearestSecond …
 func RoundToNearestSecond(now time.Time, interval time.Duration) time.Time {
 	sec := now.Second() * int(time.Second)
 	ns := now.Nanosecond()

@@ -10,7 +10,6 @@ import (
 	"github.com/golang/protobuf/proto"
 )
 
-// Connection …
 type Connection struct {
 	conn *net.UDPConn
 	addr *net.UDPAddr
@@ -58,7 +57,6 @@ func (c Connection) convert(it types.InputType, buf []byte) (pb proto.Message, e
 	return
 }
 
-// Handler …
 func (c *Connection) Handler() {
 	go func() {
 		switch c.it {
@@ -78,6 +76,10 @@ func (c *Connection) Handler() {
 			c.handleLeaveRoom()
 		case types.IQueryRooms:
 			c.handleQueryRooms()
+		case types.IRoomExists:
+			c.handleRoomExists()
+		case types.IUserLeaveRoom:
+			c.handleUserLeaveRoom()
 		default:
 			if e := utils.SendEmpty(c.conn, c.addr); e != nil {
 				log.Println(e)
@@ -86,7 +88,6 @@ func (c *Connection) Handler() {
 	}()
 }
 
-// ParseConn …
 func ParseConn(conn *net.UDPConn) (c Connection, e error) {
 	addr, it, buffer, err := c.parse(conn)
 	if err != nil {

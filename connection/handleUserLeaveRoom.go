@@ -8,11 +8,11 @@ import (
 	"github.com/Iteam1337/go-udp-wejay/users"
 )
 
-func (c *Connection) handleJoinRoom() {
-	msg := c.msg.(*message.JoinRoom)
-	log.Println("handleJoinRoom foo", msg)
+func (c *Connection) handleUserLeaveRoom() {
+	msg := c.msg.(*message.UserLeaveRoom)
+	log.Println("handleUserLeaveRoom", msg)
 
-	res := message.JoinRoomResponse{Ok: false}
+	res := message.UserLeaveRoomResponse{Ok: false}
 
 	if msg == nil {
 		res.Error = "could not parse input"
@@ -26,12 +26,17 @@ func (c *Connection) handleJoinRoom() {
 		return
 	}
 
-	if room, ok := rooms.Add(msg.UserId, msg.RoomId); ok {
-		res.Room = &message.RefRoom{
-			Id:   msg.RoomId,
-			Size: int32(room.Size()),
+	user, _ := users.GetUser(msg.UserId)
+	ex := rooms.Get(user.Room)
+
+	if ex != nil {
+		id, empty := ex.Evict(msg.UserId)
+		if empty {
+			rooms.Delete(id)
 		}
+
 		res.UserId = msg.UserId
+
 		res.Ok = true
 	}
 

@@ -4,7 +4,7 @@ go 1.13
 
 require (
 	bou.ke/monkey v1.0.2
-	github.com/Iteam1337/go-protobuf-wejay v0.0.0-20200402122254-9edb1cf8393a
+	github.com/Iteam1337/go-protobuf-wejay v0.0.0-20200402133023-769d7cc209b9
 	github.com/Iteam1337/go-udp-wejay/mocks v0.0.0-00010101000000-000000000000
 	github.com/cortesi/modd v0.0.0-20191202231957-98a770274f90 // indirect
 	github.com/golang/protobuf v1.3.5

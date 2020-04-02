@@ -19,9 +19,9 @@ func (c *Connection) handleRoomExists() {
 		return
 	}
 
-	res.Id = msg.Id
+	res.RoomId = msg.RoomId
 	res.Ok = true
-	res.Exists = rooms.Exists(msg.Id)
+	res.Exists = rooms.Exists(msg.RoomId)
 
 	c.send(&res)
 }

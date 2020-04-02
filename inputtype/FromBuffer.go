@@ -8,7 +8,6 @@ import (
 	"github.com/Iteam1337/go-protobuf-wejay/version"
 )
 
-// FromBuffer …
 func FromBuffer(buf []byte) (mt types.InputType, err error) {
 	if len(buf) != 2 {
 		err = fmt.Errorf("wrong buffer length\n expected: 2, got: %d", len(buf))
@@ -51,6 +50,9 @@ func FromBuffer(buf []byte) (mt types.InputType, err error) {
 	case byte(types.IQueryRooms):
 		log.Println("new request: QueryRooms")
 		mt = types.IQueryRooms
+	case byte(types.IUserLeaveRoom):
+		log.Println("new request: UserLeaveRoom")
+		mt = types.IUserLeaveRoom
 	default:
 		err = fmt.Errorf("unkown type: %s", string(buf[0]))
 	}

@@ -7,13 +7,11 @@ import (
 	"github.com/Iteam1337/go-udp-wejay/user"
 )
 
-// Users …
 type Users struct {
 	users       map[string]user.User
 	spotifyauth spotifyauth.Interface
 }
 
-// GetUser …
 func (u *Users) GetUser(id string) (user *user.User, err error) {
 	if result, ok := u.users[id]; ok {
 		user = &result
@@ -23,7 +21,6 @@ func (u *Users) GetUser(id string) (user *user.User, err error) {
 	return
 }
 
-// New …
 func (u *Users) New(id string, code string) {
 	token, err := u.spotifyauth.Exchange(code)
 
@@ -39,13 +36,12 @@ func (u *Users) New(id string, code string) {
 	}
 }
 
-// Exists …
 func (u Users) Exists(id string) bool {
 	_, ok := u.users[id]
+
 	return ok
 }
 
-// Delete …
 func (u *Users) Delete(id string) {
 	if user, ok := u.users[id]; ok {
 		user.Destroy()
@@ -53,7 +49,6 @@ func (u *Users) Delete(id string) {
 	}
 }
 
-// Global values
 var (
 	users = Users{
 		users:       make(map[string]user.User),

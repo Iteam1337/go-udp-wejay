@@ -16,14 +16,12 @@ func send(msg []byte, conn *net.UDPConn, addr *net.UDPAddr) (err error) {
 	return
 }
 
-// Send …
 func Send(m types.MessageType, msg []byte, conn *net.UDPConn, addr *net.UDPAddr) (e error) {
 	b := m.ByteAndVersion()
 	e = send(append(b[:], msg...), conn, addr)
 	return
 }
 
-// SendM …
 func SendM(m types.MessageType, pb proto.Message, conn *net.UDPConn, addr *net.UDPAddr) (e error) {
 	b := m.ByteAndVersion()
 	if msg, err := proto.Marshal(pb); err != nil {
@@ -35,7 +33,6 @@ func SendM(m types.MessageType, pb proto.Message, conn *net.UDPConn, addr *net.U
 	return
 }
 
-// SendEmpty …
 func SendEmpty(conn *net.UDPConn, addr *net.UDPAddr) (e error) {
 	e = send([]byte{}, conn, addr)
 	return
