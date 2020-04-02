@@ -12,8 +12,6 @@ type Rooms struct {
 }
 
 func (r *Rooms) Get(id string) (room *room.Room) {
-	log.Println(id, r.rooms)
-
 	if res, ok := r.rooms[id]; ok {
 		room = res
 	}
