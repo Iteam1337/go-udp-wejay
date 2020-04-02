@@ -2,6 +2,7 @@ package rooms
 
 import (
 	"log"
+	"strings"
 
 	"github.com/Iteam1337/go-udp-wejay/room"
 	"github.com/Iteam1337/go-udp-wejay/users"
@@ -33,16 +34,15 @@ func (r *Rooms) Add(userID string, id string) (out room.Room, ok bool) {
 		res.Add(userID)
 		out = *res
 	} else {
-		user.Room = id
 		newRoom := room.New(id, userID)
 		r.rooms[id] = &newRoom
 		out = newRoom
 	}
 
 	if out.Size() > 0 {
+		user.Room = id
 		ok = true
 	}
-
 	return
 }
 
@@ -77,13 +77,30 @@ func (r *Rooms) Evict(userID string) (ok bool) {
 	return
 }
 
-var (
-	rooms = Rooms{
-		rooms: make(map[string]*room.Room),
+type QueryResult struct {
+	Name string
+	Size int
+}
+
+func (r *Rooms) Available(filter string) (result []QueryResult) {
+	for key, res := range r.rooms {
+		if filter == "" || strings.Contains(key, filter) {
+			result = append(result, QueryResult{
+				Name: key,
+				Size: res.Size(),
+			})
+		}
 	}
-	Get    = rooms.Get
-	Add    = rooms.Add
-	Exists = rooms.Exists
-	Delete = rooms.Delete
-	Evict  = rooms.Evict
+
+	return
+}
+
+var (
+	rooms     = Rooms{rooms: make(map[string]*room.Room)}
+	Get       = rooms.Get
+	Add       = rooms.Add
+	Exists    = rooms.Exists
+	Delete    = rooms.Delete
+	Evict     = rooms.Evict
+	Available = rooms.Available
 )
