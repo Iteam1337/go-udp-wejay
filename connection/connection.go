@@ -70,8 +70,6 @@ func (c *Connection) Handler() {
 			c.handleCallbackURL()
 		case types.IPing:
 			c.handlePing()
-		case types.IListen:
-			c.handleListen()
 		case types.IDeleteUser:
 			c.handleDeleteUser()
 		default:
