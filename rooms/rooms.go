@@ -13,11 +13,12 @@ func (r *Rooms) Get(id string) {}
 // Add …
 func (r *Rooms) Add(userId string, id string) {}
 
-// RoomExists …
-func (r *Rooms) RoomExists(id string) bool {
+// Exists …
+func (r *Rooms) Exists(id string) bool {
 	if _, ok := r.rooms[id]; ok {
 		return true
 	}
+
 	return false
 }
 
@@ -31,8 +32,8 @@ var (
 	rooms = Rooms{
 		rooms: make(map[string]room.Room),
 	}
-	Get        = rooms.Get
-	Add        = rooms.Add
-	RoomExists = rooms.RoomExists
-	Delete     = rooms.Delete
+	Get    = rooms.Get
+	Add    = rooms.Add
+	Exists = rooms.Exists
+	Delete = rooms.Delete
 )

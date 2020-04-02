@@ -39,6 +39,18 @@ func FromBuffer(buf []byte) (mt types.InputType, err error) {
 	case byte(types.IPing):
 		log.Println("new request: Ping")
 		mt = types.IPing
+	case byte(types.IRoomExists):
+		log.Println("new request: RoomExists")
+		mt = types.IRoomExists
+	case byte(types.IJoinRoom):
+		log.Println("new request: JoinRoom")
+		mt = types.IJoinRoom
+	case byte(types.ILeaveRoom):
+		log.Println("new request: LeaveRoom")
+		mt = types.ILeaveRoom
+	case byte(types.IQueryRooms):
+		log.Println("new request: QueryRooms")
+		mt = types.IQueryRooms
 	default:
 		err = fmt.Errorf("unkown type: %s", string(buf[0]))
 	}

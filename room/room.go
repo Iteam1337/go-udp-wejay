@@ -9,9 +9,6 @@ type Room struct {
 	id string
 }
 
-// GetRoom …
-func (r *Room) GetRoom() {}
-
 // Destroy …
 func (u *Room) Destroy() {
 	utils.SetNil(&u.id)
