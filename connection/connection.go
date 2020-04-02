@@ -80,6 +80,8 @@ func (c *Connection) Handler() {
 			c.handleRoomExists()
 		case types.IUserLeaveRoom:
 			c.handleUserLeaveRoom()
+		case types.IUserRoom:
+			c.handleUserRoom()
 		default:
 			if e := utils.SendEmpty(c.conn, c.addr); e != nil {
 				log.Println(e)

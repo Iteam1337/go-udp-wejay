@@ -13,6 +13,7 @@ func (r *Rooms) Get(id string) (room *room.Room) {
 	if res, ok := r.rooms[id]; ok {
 		room = res
 	}
+
 	return
 }
 
@@ -30,6 +31,7 @@ func (r *Rooms) Add(userID string, id string) (out room.Room, ok bool) {
 		res.Add(userID)
 		out = *res
 	} else {
+		user.Room = id
 		out = room.New(id, userID)
 	}
 

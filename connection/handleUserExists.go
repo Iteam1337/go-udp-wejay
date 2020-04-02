@@ -1,15 +1,12 @@
 package connection
 
 import (
-	"log"
-
 	"github.com/Iteam1337/go-protobuf-wejay/message"
 	"github.com/Iteam1337/go-udp-wejay/users"
 )
 
 func (c *Connection) handleUserExists() {
 	msg := c.msg.(*message.UserExists)
-	log.Println("handleUserExists", msg)
 
 	res := message.UserExistsResponse{Ok: false}
 

@@ -9,7 +9,7 @@ import (
 
 func (c *Connection) handleNewUser() {
 	msg := c.msg.(*message.NewUser)
-	log.Println("handleNewUser", msg)
+	log.Println("handleNewUser")
 	res := message.NewUserResponse{Ok: false}
 
 	if msg == nil {
