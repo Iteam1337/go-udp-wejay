@@ -4,7 +4,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/zmb3/spotify"
+	"github.com/ankjevel/spotify"
 )
 
 func (u *User) playlistName(name string) string {
@@ -23,9 +23,18 @@ func (u *User) findPlaylist(name string) (playlist spotify.SimplePlaylist, err e
 				continue
 			}
 
-			if !pl.IsPublic {
-				err = u.client.ChangePlaylistAccess(pl.ID, true)
+			if pl.IsPublic {
+				err = u.client.ChangePlaylistAccess(pl.ID, false)
 				if err != nil {
+					log.Println("can't change access status", err)
+					return
+				}
+			}
+
+			if !pl.Collaborative {
+				err = u.client.ChangePlaylistCollaborative(pl.ID, true)
+				if err != nil {
+					log.Println("can't change collaborative status", err)
 					return
 				}
 			}
@@ -43,13 +52,19 @@ func (u *User) findPlaylist(name string) (playlist spotify.SimplePlaylist, err e
 
 	user, e := u.client.CurrentUser()
 	if e != nil {
+		log.Println("can't get current user", e)
 		err = e
 		return
 	}
 
-	if pl, e := u.client.CreatePlaylistForUser(user.ID, name, "collaborative playlist for wejay", true); e != nil {
+	if pl, e := u.client.CreatePlaylistForUser(user.ID, name, "collaborative playlist for wejay", false); e != nil {
 		err = e
 	} else {
+		err = u.client.ChangePlaylistCollaborative(pl.ID, true)
+		if err != nil {
+			log.Println("can't change collaborative status", err)
+			return
+		}
 		playlist = pl.SimplePlaylist
 	}
 
@@ -61,7 +76,7 @@ func (u *User) setDefaults() {
 		log.Println("can't get user", err)
 		return
 	} else {
-		u.clientID = spotify.ID(user.ID)
+		u.ClientID = spotify.ID(user.ID)
 	}
 	u.playlist = spotify.SimplePlaylist{}
 	u.active = false
@@ -114,10 +129,9 @@ func (u *User) handlePlayerState() {
 
 func (u *User) setContext(device spotify.PlayerDevice) {
 	if err := u.client.PlayOpt(&spotify.PlayOptions{
-		PlaybackContext: &u.playlist.URI,
-		DeviceID:        &device.ID,
+		DeviceID: &device.ID,
 	}); err != nil {
-		log.Println("can't set play", err)
+		log.Println("can't set context", err)
 	}
 }
 

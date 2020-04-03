@@ -1,7 +1,7 @@
 package spotifyauth
 
 import (
-	"github.com/zmb3/spotify"
+	"github.com/ankjevel/spotify"
 	"golang.org/x/oauth2"
 )
 

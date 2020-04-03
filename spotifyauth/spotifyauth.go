@@ -3,7 +3,7 @@ package spotifyauth
 import (
 	"github.com/Iteam1337/go-udp-wejay/utils"
 
-	"github.com/zmb3/spotify"
+	"github.com/ankjevel/spotify"
 	"golang.org/x/oauth2"
 )
 
@@ -37,6 +37,7 @@ var (
 			spotify.ScopeUserReadPlaybackState,
 			spotify.ScopeUserModifyPlaybackState,
 			spotify.ScopePlaylistModifyPublic,
+			spotify.ScopePlaylistModifyPrivate,
 			spotify.ScopePlaylistReadCollaborative,
 		),
 	}

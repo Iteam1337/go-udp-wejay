@@ -1,7 +1,7 @@
 package spotifyclient
 
 import (
-	"github.com/zmb3/spotify"
+	"github.com/ankjevel/spotify"
 )
 
 type MockSpotifyClient struct {

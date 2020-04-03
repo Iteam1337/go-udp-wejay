@@ -8,7 +8,7 @@ import (
 	"golang.org/x/oauth2"
 
 	"github.com/Iteam1337/go-udp-wejay/spotifyauth"
-	"github.com/zmb3/spotify"
+	"github.com/ankjevel/spotify"
 )
 
 func Test_canCreateUser(t *testing.T) {
@@ -74,8 +74,8 @@ func Test_setClient(t *testing.T) {
 		t.Error("active not set\n", u.active)
 	}
 
-	if u.clientID != "hey" {
-		t.Error("clientID not set\n", u.clientID)
+	if u.ClientID != "hey" {
+		t.Error("clientID not set\n", u.ClientID)
 	}
 
 	defer monkey.UnpatchAll()

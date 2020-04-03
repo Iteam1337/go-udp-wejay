@@ -3,13 +3,14 @@ package room
 import (
 	"github.com/Iteam1337/go-udp-wejay/user"
 	"github.com/Iteam1337/go-udp-wejay/users"
-	"github.com/zmb3/spotify"
+	"github.com/ankjevel/spotify"
 )
 
 type Room struct {
-	id       string
-	users    map[string]*user.User
-	playlist spotify.SimplePlaylist
+	id            string
+	users         map[string]*user.User
+	playlist      spotify.SimplePlaylist
+	playlistOwner spotify.ID
 }
 
 func (r *Room) Evict(userID string) (id string, empty bool) {
@@ -37,7 +38,7 @@ func (r *Room) Add(userID string) {
 	}
 
 	r.users[userID] = u
-	u.JoinRoom(r.id, r.playlist)
+	u.JoinRoom(r.id, r.playlist, r.playlistOwner)
 }
 
 func (r *Room) Size() int {
@@ -56,11 +57,14 @@ func New(id string, userID string) (r Room) {
 		return
 	}
 
+	playlistOwner := u.ClientID
+
 	r.users = map[string]*user.User{}
 	r.users[userID] = u
 	r.id = id
 	r.playlist = playlist
+	r.playlistOwner = playlistOwner
 
-	u.JoinRoom(id, playlist)
+	u.JoinRoom(id, playlist, playlistOwner)
 	return
 }
