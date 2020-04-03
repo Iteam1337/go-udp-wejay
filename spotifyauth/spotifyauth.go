@@ -39,6 +39,7 @@ var (
 			spotify.ScopePlaylistModifyPublic,
 			spotify.ScopePlaylistModifyPrivate,
 			spotify.ScopePlaylistReadCollaborative,
+			spotify.ScopeStreaming,
 		),
 	}
 	AuthURL   = Struct.AuthURL

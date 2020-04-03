@@ -77,6 +77,14 @@ func (r *Rooms) Evict(userID string) (ok bool) {
 	return
 }
 
+func (r *Rooms) InRoom(id string, userID string) (isInRoom bool) {
+	if res, ok := r.rooms[id]; ok {
+		isInRoom = res.Includes(userID)
+	}
+
+	return
+}
+
 type QueryResult struct {
 	Name string
 	Size int

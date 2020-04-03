@@ -11,12 +11,13 @@ import (
 )
 
 type User struct {
-	id       string
-	client   *spotify.Client
-	active   bool
-	playlist spotify.SimplePlaylist
-	ClientID spotify.ID
-	Room     string
+	id            string
+	client        *spotify.Client
+	active        bool
+	playlist      spotify.SimplePlaylist
+	playlistOwner bool
+	ClientID      spotify.ID
+	Room          string
 }
 
 func (u *User) GetClient() *spotify.Client {
@@ -28,6 +29,7 @@ func (u *User) Destroy() {
 	utils.SetNil(&u.client)
 	utils.SetNil(&u.active)
 	utils.SetNil(&u.playlist)
+	utils.SetNil(&u.playlistOwner)
 	utils.SetNil(&u.ClientID)
 	utils.SetNil(&u.Room)
 }
@@ -37,7 +39,9 @@ func (u *User) JoinRoom(name string, playlist spotify.SimplePlaylist, owner spot
 		u.playlist = playlist
 	}
 
-	if u.ClientID != owner {
+	playlistOwner := u.ClientID == owner
+	u.playlistOwner = playlistOwner
+	if !playlistOwner {
 		if err := u.client.FollowPlaylist(owner, playlist.ID, true); err != nil {
 			log.Println("follow failed", err)
 			return
@@ -45,8 +49,10 @@ func (u *User) JoinRoom(name string, playlist spotify.SimplePlaylist, owner spot
 	}
 
 	u.Room = name
+	if u.active {
+		return
+	}
 	u.active = true
-
 	go u.loopState()
 }
 

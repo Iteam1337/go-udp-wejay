@@ -27,8 +27,16 @@ func (r *Room) Evict(userID string) (id string, empty bool) {
 	return
 }
 
-func (r *Room) Add(userID string) {
+func (r *Room) Includes(userID string) bool {
 	if _, ok := r.users[userID]; ok {
+		return true
+	}
+
+	return false
+}
+
+func (r *Room) Add(userID string) {
+	if r.Includes(userID) {
 		return
 	}
 

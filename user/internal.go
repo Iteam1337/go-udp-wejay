@@ -89,7 +89,7 @@ func (u *User) getActiveDevice() (current spotify.PlayerDevice, ok bool) {
 		return
 	}
 
-	if ps.Device.Active && !ps.Device.Restricted {
+	if ps.Device.Active && !ps.Device.Restricted && ps.Device.ID != "" {
 		ok = true
 		current = ps.Device
 		return
@@ -102,7 +102,7 @@ func (u *User) getActiveDevice() (current spotify.PlayerDevice, ok bool) {
 	}
 
 	for _, device := range dev {
-		if device.Restricted {
+		if device.Restricted || device.ID == "" {
 			continue
 		}
 
@@ -117,7 +117,14 @@ func (u *User) getActiveDevice() (current spotify.PlayerDevice, ok bool) {
 func (u *User) handlePlayerState() {
 	ps, err := u.client.PlayerState()
 	if err != nil {
+		log.Println("cant get playerState", err)
 		return
+	}
+
+	if ps.PlaybackContext.URI != u.playlist.URI {
+		if err := u.client.PlayOpt(&spotify.PlayOptions{PlaybackContext: &u.playlist.URI}); err != nil {
+			log.Println("can't set playlistURI as context", err)
+		}
 	}
 
 	if ps.ShuffleState {
@@ -127,16 +134,36 @@ func (u *User) handlePlayerState() {
 	}
 }
 
-func (u *User) setContext(device spotify.PlayerDevice) {
-	if err := u.client.PlayOpt(&spotify.PlayOptions{
-		DeviceID: &device.ID,
-	}); err != nil {
-		log.Println("can't set context", err)
+func (u *User) setContext(device spotify.PlayerDevice) (ok bool) {
+	if device.Active || device.Restricted || device.ID == "" {
+		ok = true
+		return
 	}
+
+	if err := u.client.PlayOpt(&spotify.PlayOptions{DeviceID: &device.ID}); err == nil {
+		ok = true
+	}
+
+	return
 }
 
 func sleep() {
-	time.Sleep(15 * time.Second)
+	time.Sleep(30 * time.Second)
+}
+
+func (u *User) checkPlaylistSongs() {
+	_, err := u.client.GetPlaylistTracks(u.playlist.ID)
+	if err != nil {
+		log.Println("can't get playlist tracks", err)
+	}
+
+	// for _, track := range pl.Tracks {
+	// 	log.Println(track)
+	// 	// if rooms.InRoom(u.Room, track.AddedBy) {
+	// 	// 	continue
+	// 	// }
+	// }
+
 }
 
 func (u *User) loopState() {
@@ -150,15 +177,21 @@ func (u *User) loopState() {
 		}
 
 		device, ok := u.getActiveDevice()
-		if !ok {
+		if !ok || !u.setContext(device) {
 			sleep()
 			continue
 		}
 
-		u.setContext(device)
+		log.Println("did set context")
+
 		go u.handlePlayerState()
 
-		log.Println("do things")
+		if u.playlistOwner {
+			u.checkPlaylistSongs()
+		} else {
+			log.Println("do other things")
+		}
+
 		sleep()
 	}
 }

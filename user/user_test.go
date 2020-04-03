@@ -70,10 +70,6 @@ func Test_setClient(t *testing.T) {
 
 	u.SetClient(&token)
 
-	if u.active != false {
-		t.Error("active not set\n", u.active)
-	}
-
 	if u.ClientID != "hey" {
 		t.Error("clientID not set\n", u.ClientID)
 	}
