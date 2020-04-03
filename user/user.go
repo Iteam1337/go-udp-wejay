@@ -34,14 +34,83 @@ func (u *User) Destroy() {
 	utils.SetNil(&u.Room)
 }
 
-func (u *User) findPlaylist() {
-	pl, err := u.client.CurrentUsersPlaylists()
-	if err != nil {
+func (u *User) JoinRoom(name string) {
+	if u.Room == name {
 		return
 	}
-	for _, pl := range pl.Playlists {
+
+	u.Room = name
+
+	if pl, err := u.findPlaylist(name); err != nil {
+		log.Println(err)
+	} else {
 		log.Println(pl)
 	}
+}
+
+func (u *User) playlistName(name string) string {
+	return "[wejay] " + name
+}
+
+func (u *User) LeaveRoom() {
+	if u.Room == "" {
+		return
+	}
+
+	if pl, e := u.client.CurrentUsersPlaylists(); e == nil {
+		user, _ := u.client.CurrentUser()
+		id := spotify.ID(user.ID)
+		for _, pl := range pl.Playlists {
+			if pl.Name != u.playlistName(u.Room) {
+				continue
+			}
+
+			if err := u.client.UnfollowPlaylist(id, pl.ID); err != nil {
+				log.Println(err)
+			}
+
+			break
+		}
+	}
+
+	u.Room = ""
+}
+
+func (u *User) findPlaylist(name string) (playlist spotify.SimplePlaylist, err error) {
+	name = u.playlistName(name)
+
+	found := false
+	if pl, e := u.client.CurrentUsersPlaylists(); e != nil {
+		err = e
+	} else {
+		for _, pl := range pl.Playlists {
+			if pl.Name != name {
+				continue
+			}
+
+			playlist = pl
+			found = true
+			break
+		}
+	}
+
+	if found {
+		return
+	}
+
+	user, e := u.client.CurrentUser()
+	if e != nil {
+		err = e
+		return
+	}
+
+	if pl, e := u.client.CreatePlaylistForUser(user.ID, name, "collaborative playlist for wejay", true); e != nil {
+		err = e
+	} else {
+		playlist = pl.SimplePlaylist
+	}
+
+	return
 }
 
 func (u *User) setDefaults() {
@@ -62,7 +131,6 @@ func (u *User) SetClient(token *oauth2.Token) {
 	client := spotifyauth.NewClient(token)
 	u.client = &client
 
-	defer u.findPlaylist()
 	defer u.setDefaults()
 }
 

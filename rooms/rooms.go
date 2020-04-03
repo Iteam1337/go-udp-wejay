@@ -40,7 +40,7 @@ func (r *Rooms) Add(userID string, id string) (out room.Room, ok bool) {
 	}
 
 	if out.Size() > 0 {
-		user.Room = id
+		user.JoinRoom(id)
 		ok = true
 	}
 	return

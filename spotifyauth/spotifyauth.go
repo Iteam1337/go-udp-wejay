@@ -36,6 +36,8 @@ var (
 			spotify.ScopeUserReadCurrentlyPlaying,
 			spotify.ScopeUserReadPlaybackState,
 			spotify.ScopeUserModifyPlaybackState,
+			spotify.ScopePlaylistModifyPublic,
+			spotify.ScopePlaylistModifyPrivate,
 		),
 	}
 	AuthURL   = Struct.AuthURL
