@@ -30,6 +30,8 @@ func (c *Connection) handleUserRoom() {
 		c.send(&res)
 		return
 	} else {
+		log.Println(user, user.Room)
+
 		res.UserId = msg.UserId
 		res.RoomId = user.Room
 		res.Ok = true

@@ -20,7 +20,7 @@ func (r *Rooms) Get(id string) (room *room.Room) {
 	return
 }
 
-func (r *Rooms) Add(userID string, id string) (out room.Room, ok bool) {
+func (r *Rooms) Add(userID string, id string) (out *room.Room, ok bool) {
 	user, _ := users.GetUser(userID)
 	ex := rooms.Get(user.Room)
 
@@ -30,19 +30,19 @@ func (r *Rooms) Add(userID string, id string) (out room.Room, ok bool) {
 		}
 	}
 
-	if res, ok := r.rooms[id]; ok {
-		res.Add(userID)
-		out = *res
+	if existingRoom, ok := r.rooms[id]; ok {
+		existingRoom.Add(userID)
+		out = existingRoom
 	} else {
 		newRoom := room.New(id, userID)
 		r.rooms[id] = &newRoom
-		out = newRoom
+		out = &newRoom
 	}
 
 	if out.Size() > 0 {
-		user.JoinRoom(id)
 		ok = true
 	}
+
 	return
 }
 

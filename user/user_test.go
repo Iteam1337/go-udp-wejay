@@ -37,9 +37,6 @@ func Test_setClient(t *testing.T) {
 			Playing:   true,
 			Item:      &item,
 		},
-		Device: spotify.PlayerDevice{
-			Active: true,
-		},
 	}
 
 	pu := spotify.PrivateUser{
@@ -73,20 +70,8 @@ func Test_setClient(t *testing.T) {
 
 	u.SetClient(&token)
 
-	if u.active != true {
+	if u.active != false {
 		t.Error("active not set\n", u.active)
-	}
-
-	if u.listening != true {
-		t.Error("listening not set\n", u.listening)
-	}
-
-	if u.progress != 1337 {
-		t.Error("progress not set\n", u.progress)
-	}
-
-	if u.currentItem != "uri://" {
-		t.Error("currentItem not set\n", u.currentItem)
 	}
 
 	if u.clientID != "hey" {
