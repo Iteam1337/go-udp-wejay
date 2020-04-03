@@ -42,6 +42,12 @@ func Test_setClient(t *testing.T) {
 		},
 	}
 
+	pu := spotify.PrivateUser{
+		User: spotify.User{
+			ID: "hey",
+		},
+	}
+
 	var a spotifyauth.SpotifyAuth
 	var d *spotify.Client
 
@@ -51,6 +57,11 @@ func Test_setClient(t *testing.T) {
 
 	monkey.PatchInstanceMethod(reflect.TypeOf(d), "PlayerState", func(*spotify.Client) (ps *spotify.PlayerState, e error) {
 		ps = &p
+		return
+	})
+
+	monkey.PatchInstanceMethod(reflect.TypeOf(d), "CurrentUser", func(*spotify.Client) (res *spotify.PrivateUser, e error) {
+		res = &pu
 		return
 	})
 
@@ -74,8 +85,12 @@ func Test_setClient(t *testing.T) {
 		t.Error("progress not set\n", u.progress)
 	}
 
-	if u.current != "uri://" {
-		t.Error("current not set\n", u.current)
+	if u.currentItem != "uri://" {
+		t.Error("currentItem not set\n", u.currentItem)
+	}
+
+	if u.clientID != "hey" {
+		t.Error("clientID not set\n", u.clientID)
 	}
 
 	defer monkey.UnpatchAll()
