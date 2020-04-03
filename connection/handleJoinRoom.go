@@ -10,8 +10,7 @@ import (
 
 func (c *Connection) handleJoinRoom() {
 	msg := c.msg.(*message.JoinRoom)
-	log.Println("handleJoinRoom foo", msg)
-
+	log.Println("handleJoinRoom", msg)
 	res := message.JoinRoomResponse{Ok: false}
 
 	if msg == nil {
