@@ -1,8 +1,6 @@
 package connection
 
 import (
-	"log"
-
 	"github.com/Iteam1337/go-protobuf-wejay/message"
 	"github.com/Iteam1337/go-udp-wejay/rooms"
 	"github.com/Iteam1337/go-udp-wejay/users"
@@ -11,8 +9,6 @@ import (
 func (c *Connection) handleUserLeaveRoom() {
 	msg := c.msg.(*message.UserLeaveRoom)
 	res := message.UserLeaveRoomResponse{Ok: false}
-	log.Println("handleUserLeaveRoom", msg)
-
 	if msg == nil {
 		res.Error = "could not parse input"
 		c.send(&res)

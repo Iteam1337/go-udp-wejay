@@ -1,8 +1,6 @@
 package connection
 
 import (
-	"log"
-
 	"github.com/Iteam1337/go-protobuf-wejay/message"
 	"github.com/Iteam1337/go-udp-wejay/rooms"
 	"github.com/Iteam1337/go-udp-wejay/users"
@@ -10,7 +8,6 @@ import (
 
 func (c *Connection) handleJoinRoom() {
 	msg := c.msg.(*message.JoinRoom)
-	log.Println("handleJoinRoom", msg)
 	res := message.JoinRoomResponse{Ok: false}
 
 	if msg == nil {

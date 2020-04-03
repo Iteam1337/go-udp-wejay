@@ -1,15 +1,12 @@
 package connection
 
 import (
-	"log"
-
 	"github.com/Iteam1337/go-protobuf-wejay/message"
 	"github.com/Iteam1337/go-udp-wejay/users"
 )
 
 func (c *Connection) handleNewUser() {
 	msg := c.msg.(*message.NewUser)
-	log.Println("handleNewUser")
 	res := message.NewUserResponse{Ok: false}
 
 	if msg == nil {

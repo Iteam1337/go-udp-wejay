@@ -58,10 +58,7 @@ func (u *User) JoinRoom(name string, playlist spotify.SimplePlaylist, owner spot
 
 func (u *User) LeaveRoom() {
 	u.active = false
-
-	if u.Room == "" {
-		return
-	}
+	u.playlistOwner = false
 
 	if u.playlist.ID != "" {
 		if err := u.client.UnfollowPlaylist(u.ClientID, u.playlist.ID); err != nil {
@@ -79,6 +76,10 @@ func (u *User) SetClient(token *oauth2.Token) {
 	u.client = &client
 
 	defer u.setDefaults()
+}
+
+func (u *User) Promote() {
+	u.playlistOwner = true
 }
 
 func (u *User) NewPlaylist(name string) (playlist spotify.SimplePlaylist, ok bool) {

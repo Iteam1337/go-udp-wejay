@@ -1,16 +1,12 @@
 package connection
 
 import (
-	"log"
-
 	"github.com/Iteam1337/go-protobuf-wejay/message"
 	"github.com/Iteam1337/go-udp-wejay/rooms"
 )
 
 func (c *Connection) handleQueryRooms() {
 	msg := c.msg.(*message.QueryRooms)
-	log.Println("handleQueryRooms", msg)
-
 	res := message.QueryRoomsResponse{Ok: false}
 
 	if msg == nil {

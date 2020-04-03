@@ -1,16 +1,12 @@
 package connection
 
 import (
-	"log"
-
 	"github.com/Iteam1337/go-protobuf-wejay/message"
 	"github.com/Iteam1337/go-udp-wejay/users"
 )
 
 func (c *Connection) handleUserRoom() {
 	msg := c.msg.(*message.UserRoom)
-	log.Println("handleUserExists", msg)
-
 	res := message.UserRoomResponse{Ok: false}
 
 	if msg == nil {
@@ -30,8 +26,6 @@ func (c *Connection) handleUserRoom() {
 		c.send(&res)
 		return
 	} else {
-		log.Println(user, user.Room)
-
 		res.UserId = msg.UserId
 		res.RoomId = user.Room
 		res.Ok = true

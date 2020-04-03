@@ -11,6 +11,7 @@ type Room struct {
 	users         map[string]*user.User
 	playlist      spotify.SimplePlaylist
 	playlistOwner spotify.ID
+	owner         *user.User
 }
 
 func (r *Room) Evict(userID string) (id string, empty bool) {
@@ -22,6 +23,10 @@ func (r *Room) Evict(userID string) (id string, empty bool) {
 	u, err := users.GetUser(userID)
 	if u != nil && err == nil {
 		u.LeaveRoom()
+
+		if r.owner.ClientID == u.ClientID {
+			r.promoteNewOwner()
+		}
 	}
 
 	return
@@ -46,7 +51,7 @@ func (r *Room) Add(userID string) {
 	}
 
 	r.users[userID] = u
-	u.JoinRoom(r.id, r.playlist, r.playlistOwner)
+	u.JoinRoom(r.id, r.playlist, r.owner.ClientID)
 }
 
 func (r *Room) Size() int {
@@ -72,7 +77,8 @@ func New(id string, userID string) (r Room) {
 	r.id = id
 	r.playlist = playlist
 	r.playlistOwner = playlistOwner
+	r.owner = u
 
-	u.JoinRoom(id, playlist, playlistOwner)
+	u.JoinRoom(id, playlist, u.ClientID)
 	return
 }
