@@ -1,6 +1,8 @@
 package room
 
 import (
+	"time"
+
 	"github.com/Iteam1337/go-udp-wejay/user"
 	"github.com/Iteam1337/go-udp-wejay/users"
 	"github.com/ankjevel/spotify"
@@ -8,12 +10,14 @@ import (
 
 type Room struct {
 	active        bool
-	id            string
-	users         map[string]*user.User
 	clientIDs     map[spotify.ID]string
+	currentTrack  spotify.PlaylistTrack
+	elapsed       time.Time
+	id            string
+	owner         *user.User
 	playlist      spotify.SimplePlaylist
 	playlistOwner spotify.ID
-	owner         *user.User
+	users         map[string]*user.User
 }
 
 func (r *Room) Evict(userID string) (id string, empty bool) {
@@ -66,6 +70,10 @@ func (r *Room) Size() int {
 	return len(r.users)
 }
 
+func (r *Room) Elapsed() time.Duration {
+	return time.Since(r.elapsed)
+}
+
 func New(id string, userID string) (r Room) {
 	u, err := users.GetUser(userID)
 
@@ -94,7 +102,17 @@ func New(id string, userID string) (r Room) {
 
 	u.JoinRoom(id, playlist, u.ClientID)
 
-	go r.listen()
+	go r.ownerListen()
+	go func() {
+		for {
+			if !r.active || r.currentTrack.Track.ID != "" {
+				break
+			}
+			time.Sleep(1 * time.Second)
+		}
+
+		r.clientsListen()
+	}()
 
 	return
 }

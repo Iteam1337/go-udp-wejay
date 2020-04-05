@@ -121,26 +121,28 @@ func (u *User) handlePlayerState() {
 		return
 	}
 
-	if ps.PlaybackContext.URI != u.playlist.URI {
-		if err := u.client.PlayOpt(&spotify.PlayOptions{PlaybackContext: &u.playlist.URI}); err != nil {
-			log.Println("can't set playlistURI as context", err)
-		}
-	}
-
 	if ps.ShuffleState {
 		if err := u.client.Shuffle(false); err != nil {
 			log.Println("can't unshuffle", err)
 		}
 	}
+
+	if ps.RepeatState != "off" {
+		if err := u.client.Repeat("off"); err != nil {
+			log.Println("can't set repeat state", err)
+		}
+	}
 }
 
-func (u *User) setContext(device spotify.PlayerDevice) (ok bool) {
+func (u *User) setContext(device spotify.PlayerDevice, id string) (ok bool) {
 	if device.Active || device.Restricted || device.ID == "" {
 		ok = true
 		return
 	}
 
-	if err := u.client.PlayOpt(&spotify.PlayOptions{DeviceID: &device.ID}); err == nil {
+	if err := u.client.PlayOpt(&spotify.PlayOptions{
+		DeviceID: &device.ID,
+	}); err == nil {
 		ok = true
 	}
 
@@ -151,43 +153,15 @@ func sleep() {
 	time.Sleep(30 * time.Second)
 }
 
-func (u *User) checkPlaylistSongs() {
-	_, err := u.client.GetPlaylistTracks(u.playlist.ID)
-	if err != nil {
-		log.Println("can't get playlist tracks", err)
-	}
-
-	// for _, track := range pl.Tracks {
-	// 	log.Println(track)
-	// 	// if rooms.InRoom(u.Room, track.AddedBy) {
-	// 	// 	continue
-	// 	// }
-	// }
-
-}
-
 func (u *User) loopState() {
 	for {
-		if u.client == nil {
-			break
-		}
-
-		if !u.active {
+		if u.client == nil || !u.active {
 			break
 		}
 
 		device, ok := u.getActiveDevice()
-		if !ok || !u.setContext(device) {
-			sleep()
-			continue
-		}
-
-		go u.handlePlayerState()
-
-		if u.playlistOwner {
-			u.checkPlaylistSongs()
-		} else {
-			log.Println("do other things")
+		if ok && u.setContext(device, u.Room) {
+			go u.handlePlayerState()
 		}
 
 		sleep()

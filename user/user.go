@@ -14,12 +14,12 @@ import (
 )
 
 type User struct {
-	client        *spotify.Client
 	active        bool
+	client        *spotify.Client
 	playlist      spotify.SimplePlaylist
 	playlistOwner bool
-	ID            string
 	ClientID      spotify.ID
+	ID            string
 	Room          string
 }
 
