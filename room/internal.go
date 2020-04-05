@@ -5,7 +5,6 @@ import (
 	"log"
 	"time"
 
-	"github.com/Iteam1337/go-udp-wejay/user"
 	"github.com/Iteam1337/go-udp-wejay/utils"
 	"github.com/ankjevel/spotify"
 )
@@ -111,34 +110,28 @@ func (r *Room) clientsListen() {
 		}
 
 		for _, u := range r.users {
-			go func(u *user.User, client *spotify.Client) {
-				ps, err := client.PlayerState()
-				if err != nil || !ps.Playing {
-					return
-				}
-
-				if r.currentTrack.Track.ID == ps.CurrentlyPlaying.Item.ID && r.acceptableTimeDiff(ps.CurrentlyPlaying.Progress) {
-					return
-				}
-
-				po := spotify.PlayOptions{
-					PlaybackContext: &r.playlist.URI,
-					PositionMs:      int(r.Elapsed().Milliseconds()),
-				}
-
-				if err := client.PlayOpt(&po); err != nil {
-					log.Println("could not set context", u.ClientID, err)
-					return
-				}
-
-				if ps.Playing {
-					return
-				}
-
-				if err := client.Play(); err != nil {
-					log.Println("could not play", u.ClientID, err)
-				}
-			}(u, u.GetClient())
+			client := u.GetClient()
+			ps, err := client.PlayerState()
+			if err != nil || !ps.Playing {
+				continue
+			}
+			if r.currentTrack.Track.ID == ps.CurrentlyPlaying.Item.ID && r.acceptableTimeDiff(ps.CurrentlyPlaying.Progress) {
+				continue
+			}
+			po := spotify.PlayOptions{
+				PlaybackContext: &r.playlist.URI,
+				PositionMs:      int(r.Elapsed().Milliseconds()),
+			}
+			if err := client.PlayOpt(&po); err != nil {
+				log.Println("could not set context", u.ClientID, err)
+				return
+			}
+			if ps.Playing {
+				return
+			}
+			if err := client.Play(); err != nil {
+				log.Println("could not play", u.ClientID, err)
+			}
 		}
 
 		time.Sleep(10 * time.Second)
@@ -172,8 +165,6 @@ func (r *Room) ownerListen() {
 			sleep = current.Track.TimeDuration()
 			removeTrack = true
 		}
-
-		log.Println("should track be removed??", removeTrack)
 
 		time.Sleep(sleep - time.Since(now))
 

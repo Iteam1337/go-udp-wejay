@@ -49,8 +49,10 @@ func (r *Rooms) Add(userID string, id string) (out *room.Room, ok bool) {
 	}
 
 	if existingRoom, ok := r.rooms[id]; ok {
-		existingRoom.Add(userID)
-		out = existingRoom
+		if existingRoom.Size() < 30 {
+			existingRoom.Add(userID)
+			out = existingRoom
+		}
 	} else {
 		newRoom := room.New(id, userID)
 		r.rooms[id] = &newRoom
