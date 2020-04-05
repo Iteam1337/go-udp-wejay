@@ -2,7 +2,9 @@ package users
 
 import (
 	"fmt"
+	"log"
 
+	"github.com/Iteam1337/go-protobuf-wejay/message"
 	"github.com/Iteam1337/go-udp-wejay/spotifyauth"
 	"github.com/Iteam1337/go-udp-wejay/user"
 )
@@ -10,6 +12,26 @@ import (
 type Users struct {
 	users       map[string]*user.User
 	spotifyauth spotifyauth.Interface
+}
+
+func (u *Users) restore(pb message.RefUserSave) {
+	user, err := user.Restore(pb)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	if _, exists := u.users[pb.Id]; !exists {
+		u.users[pb.Id] = &user
+	}
+
+	if user.Room == "" {
+		return
+	}
+}
+
+func (u *Users) GetAll() map[string]*user.User {
+	return u.users
 }
 
 func (u *Users) GetUser(id string) (user *user.User, err error) {
@@ -54,8 +76,11 @@ var (
 		users:       make(map[string]*user.User),
 		spotifyauth: spotifyauth.Struct,
 	}
-	GetUser = users.GetUser
-	New     = users.New
-	Exists  = users.Exists
-	Delete  = users.Delete
+	GetUser   = users.GetUser
+	GetAll    = users.GetAll
+	New       = users.New
+	Exists    = users.Exists
+	Delete    = users.Delete
+	SaveState = users.SaveState
+	LoadState = users.LoadState
 )

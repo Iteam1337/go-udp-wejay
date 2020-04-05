@@ -20,6 +20,24 @@ func (r *Rooms) Get(id string) (room *room.Room) {
 	return
 }
 
+func (r *Rooms) Restore() {
+	for _, user := range users.GetAll() {
+		id := user.Room
+		userID := user.ID
+
+		if id == "" {
+			continue
+		}
+
+		if existingRoom, ok := r.rooms[id]; ok {
+			existingRoom.Add(userID)
+		} else {
+			newRoom := room.New(id, userID)
+			r.rooms[id] = &newRoom
+		}
+	}
+}
+
 func (r *Rooms) Add(userID string, id string) (out *room.Room, ok bool) {
 	user, _ := users.GetUser(userID)
 	ex := rooms.Get(user.Room)
@@ -111,4 +129,5 @@ var (
 	Delete    = rooms.Delete
 	Evict     = rooms.Evict
 	Available = rooms.Available
+	Restore   = rooms.Restore
 )

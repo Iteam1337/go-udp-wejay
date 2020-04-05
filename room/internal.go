@@ -4,8 +4,19 @@ import (
 	"log"
 	"time"
 
+	"github.com/Iteam1337/go-udp-wejay/utils"
 	"github.com/ankjevel/spotify"
 )
+
+func (r *Room) destroy() {
+	utils.SetNil(&r.active)
+	utils.SetNil(&r.id)
+	utils.SetNil(&r.users)
+	utils.SetNil(&r.clientIDs)
+	utils.SetNil(&r.playlist)
+	utils.SetNil(&r.playlistOwner)
+	utils.SetNil(&r.owner)
+}
 
 func (r *Room) promoteNewOwner() {
 	for _, user := range r.users {
@@ -28,7 +39,6 @@ func (r *Room) includesClient(clientID string) bool {
 }
 
 func (r *Room) checkPlaylistSongs(client *spotify.Client) {
-	log.Println("checkPlaylistSongs")
 	pl, err := client.GetPlaylistTracks(r.playlist.ID)
 	if err != nil {
 		log.Println("can't get playlist tracks", err)
@@ -48,8 +58,8 @@ func (r *Room) checkPlaylistSongs(client *spotify.Client) {
 
 func (r *Room) listen() {
 	for {
-		if !r.active {
-			log.Println("not active :(")
+		if !r.active || r.Size() < 1 {
+			r.destroy()
 			break
 		}
 

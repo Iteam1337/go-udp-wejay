@@ -182,8 +182,6 @@ func (u *User) loopState() {
 			continue
 		}
 
-		log.Println("did set context")
-
 		go u.handlePlayerState()
 
 		if u.playlistOwner {

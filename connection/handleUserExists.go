@@ -7,7 +7,6 @@ import (
 
 func (c *Connection) handleUserExists() {
 	msg := c.msg.(*message.UserExists)
-
 	res := message.UserExistsResponse{Ok: false}
 
 	if msg == nil {

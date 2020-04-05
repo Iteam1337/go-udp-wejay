@@ -14,7 +14,7 @@ import (
 func Test_canCreateUser(t *testing.T) {
 	u := New("x")
 
-	if u.id != "x" {
+	if u.ID != "x" {
 		t.Error("user was not created", u)
 	}
 }
@@ -22,7 +22,7 @@ func Test_canCreateUser(t *testing.T) {
 func Test_setClient(t *testing.T) {
 	u := New("x")
 
-	if u.id != "x" {
+	if u.ID != "x" {
 		t.Error("wrong id")
 		return
 	}
