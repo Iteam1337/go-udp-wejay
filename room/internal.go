@@ -43,7 +43,7 @@ func (r *Room) includesClient(clientID string) bool {
 func (r *Room) checkPlaylistSongs(client *spotify.Client) (current spotify.PlaylistTrack) {
 	pl, err := client.GetPlaylistTracks(r.playlist.ID)
 	if err != nil {
-		log.Println("can't get playlist tracks", err)
+		log.Printf(`[%s] can't get playlist tracks: %s`, r.id, err)
 		return
 	}
 
@@ -65,7 +65,7 @@ func (r *Room) checkPlaylistSongs(client *spotify.Client) (current spotify.Playl
 	if len(trackIDs) > 0 {
 		_, err := client.RemoveTracksFromPlaylist(r.playlist.ID, trackIDs...)
 		if err != nil {
-			log.Println(err)
+			log.Printf(`[%s] cant remove tracks: %s`, r.id, err)
 		}
 	}
 
@@ -106,6 +106,7 @@ func (r *Room) clientsListen() {
 		current := r.checkPlaylistSongs(client)
 		if current.Track.ID == "" || current.Track.ID != r.currentTrack.Track.ID {
 			sleep()
+
 			continue
 		}
 
@@ -115,22 +116,25 @@ func (r *Room) clientsListen() {
 			if err != nil || !ps.Playing {
 				continue
 			}
+
 			if r.currentTrack.Track.ID == ps.CurrentlyPlaying.Item.ID && r.acceptableTimeDiff(ps.CurrentlyPlaying.Progress) {
 				continue
 			}
+
 			po := spotify.PlayOptions{
 				PlaybackContext: &r.playlist.URI,
 				PositionMs:      int(r.Elapsed().Milliseconds()),
 			}
+
 			if err := client.PlayOpt(&po); err != nil {
-				log.Println("could not set context", u.ClientID, err)
-				return
+				log.Printf(`[%s](%s) could set context: %s`, r.id, u.ClientID, err)
+				continue
 			}
 			if ps.Playing {
-				return
+				continue
 			}
 			if err := client.Play(); err != nil {
-				log.Println("could not play", u.ClientID, err)
+				log.Printf(`[%s](%s) could not play: %s`, r.id, u.ClientID, err)
 			}
 		}
 
@@ -149,7 +153,7 @@ func (r *Room) ownerListen() {
 
 		client := r.owner.GetClient()
 		if client == nil {
-			log.Println("no client :(")
+			log.Printf(`[%s] no client`, r.id)
 			sleep()
 			continue
 		}
@@ -164,12 +168,14 @@ func (r *Room) ownerListen() {
 			r.currentTrack = current
 			sleep = current.Track.TimeDuration()
 			removeTrack = true
+
+			log.Printf(`[%s] playing: "%s"`, r.id, current.Track.Name)
 		}
 
 		time.Sleep(sleep - time.Since(now))
 
 		if removeTrack {
-			log.Println("removing track", current.Track.ID)
+			log.Printf(`[%s] removing: "%s"`, r.id, current.Track.Name)
 			_, err := client.RemoveTracksFromPlaylist(r.playlist.ID, current.Track.ID)
 			if err != nil {
 				log.Println(err)

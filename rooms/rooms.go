@@ -81,7 +81,7 @@ func (r *Rooms) Delete(id string) {
 func (r *Rooms) Evict(userID string) (ok bool) {
 	user, err := users.GetUser(userID)
 	if err != nil {
-		log.Println(err)
+		log.Printf(`(%s) Evict: %s`, userID, err)
 		return
 	}
 
