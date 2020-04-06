@@ -117,7 +117,7 @@ func (r *Room) clientsListen() {
 			}
 
 			ps, err := client.PlayerState()
-			if err != nil || !ps.Playing {
+			if err != nil || ps == nil || !ps.Playing {
 				continue
 			}
 

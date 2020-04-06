@@ -18,7 +18,7 @@ func main() {
 		rooms.Restore()
 
 		signalChannel := make(chan os.Signal, 2)
-		signal.Notify(signalChannel, os.Interrupt, syscall.SIGTERM)
+		signal.Notify(signalChannel, os.Interrupt, syscall.SIGTERM, syscall.SIGSEGV)
 
 		go func() {
 			<-signalChannel
