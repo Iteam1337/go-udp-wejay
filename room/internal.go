@@ -112,6 +112,10 @@ func (r *Room) clientsListen() {
 
 		for _, u := range r.users {
 			client := u.GetClient()
+			if client == nil {
+				continue
+			}
+
 			ps, err := client.PlayerState()
 			if err != nil || !ps.Playing {
 				continue
