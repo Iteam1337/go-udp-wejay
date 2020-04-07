@@ -17,6 +17,7 @@ type Room struct {
 	owner         *user.User
 	playlist      spotify.SimplePlaylist
 	playlistOwner spotify.ID
+	update        bool
 	users         map[string]*user.User
 }
 
