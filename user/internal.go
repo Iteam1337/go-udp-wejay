@@ -1,9 +1,11 @@
 package user
 
 import (
+	"bytes"
 	"log"
 	"time"
 
+	"github.com/Iteam1337/go-udp-wejay/cover"
 	"github.com/ankjevel/spotify"
 )
 
@@ -11,8 +13,8 @@ func (u *User) playlistName(name string) string {
 	return "[wejay] " + name
 }
 
-func (u *User) findPlaylist(name string) (playlist spotify.SimplePlaylist, err error) {
-	name = u.playlistName(name)
+func (u *User) findPlaylist(n string) (playlist spotify.SimplePlaylist, err error) {
+	name := u.playlistName(n)
 
 	found := false
 	if pl, e := u.client.CurrentUsersPlaylists(); e != nil {
@@ -67,6 +69,24 @@ func (u *User) findPlaylist(name string) (playlist spotify.SimplePlaylist, err e
 		}
 		playlist = pl.SimplePlaylist
 	}
+
+	if err != nil {
+		return
+	}
+
+	go func() {
+		cover, e := cover.Gen(n)
+		if e != nil {
+			log.Println("after get", e)
+			err = e
+			return
+		}
+
+		r := bytes.NewReader(cover)
+		if e := u.client.SetPlaylistImage(playlist.ID, r); e != nil {
+			log.Println("cant upload image", e, cover)
+		}
+	}()
 
 	return
 }
