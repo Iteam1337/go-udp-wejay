@@ -41,6 +41,7 @@ var (
 			spotify.ScopePlaylistReadCollaborative,
 			spotify.ScopeStreaming,
 			spotify.ScopeImageUpload,
+			// spotify.ScopeUserTopRead,
 		),
 	}
 	AuthURL   = Struct.AuthURL

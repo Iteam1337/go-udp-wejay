@@ -154,21 +154,6 @@ func (u *User) handlePlayerState() {
 	}
 }
 
-func (u *User) setContext(device spotify.PlayerDevice, id string) (ok bool) {
-	if device.Active || device.Restricted || device.ID == "" {
-		ok = true
-		return
-	}
-
-	if err := u.client.PlayOpt(&spotify.PlayOptions{
-		DeviceID: &device.ID,
-	}); err == nil {
-		ok = true
-	}
-
-	return
-}
-
 func sleep() {
 	time.Sleep(30 * time.Second)
 }
@@ -179,8 +164,7 @@ func (u *User) loopState() {
 			break
 		}
 
-		device, ok := u.getActiveDevice()
-		if ok && u.setContext(device, u.Room) {
+		if _, ok := u.getActiveDevice(); ok {
 			go u.handlePlayerState()
 		}
 
