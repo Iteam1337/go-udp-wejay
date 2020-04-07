@@ -47,20 +47,13 @@ func (r *Room) getCurrentTrack(tracks *[]spotify.PlaylistTrack, prev *spotify.Pl
 		return
 	}
 
-	index := -1
-	for i, track := range *tracks {
-		if prev.Track.ID != track.Track.ID {
-			index = i
-			break
+	for _, track := range *tracks {
+		if prev.Track.ID == track.Track.ID {
+			continue
 		}
+		current = track
+		break
 	}
-
-	if index == -1 {
-		return
-	}
-
-	copy(c, t[:1])
-	current = c[index]
 
 	return
 }

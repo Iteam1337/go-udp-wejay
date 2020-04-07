@@ -16,8 +16,7 @@ func (r *Room) ownerListen() {
 	// 	}
 	// }
 
-	doRemoveTrack := func(current spotify.PlaylistTrack) {
-		client := r.owner.GetClient()
+	doRemoveTrack := func(client *spotify.Client, current spotify.PlaylistTrack) {
 		if client == nil {
 			log.Printf(`[%s] no client`, r.id)
 			return
@@ -79,7 +78,7 @@ func (r *Room) ownerListen() {
 		time.Sleep(sleep - (3 * time.Second) - time.Since(now))
 
 		if removeTrack {
-			doRemoveTrack(current)
+			doRemoveTrack(client, current)
 		}
 
 		time.Sleep((3 * time.Second) - time.Since(now))
