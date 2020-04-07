@@ -3,6 +3,7 @@ package room
 import (
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/ankjevel/spotify"
 )
@@ -38,24 +39,33 @@ func (r *Room) getCurrentTrack(tracks *[]spotify.PlaylistTrack, prev *spotify.Pl
 		return
 	}
 
-	t := *tracks
-	c := make([]spotify.PlaylistTrack, 1)
-
-	if prev == nil {
-		copy(c, t[:1])
-		current = c[0]
-		return
-	}
-
 	for _, track := range *tracks {
-		if prev.Track.ID == track.Track.ID {
+		if prev != nil && prev.Track.ID == track.Track.ID {
 			continue
 		}
+
+		if !r.okTrack(track) {
+			continue
+		}
+
 		current = track
 		break
 	}
 
 	return
+}
+
+func (r *Room) okTrack(track spotify.PlaylistTrack) bool {
+	dur := track.Track.TimeDuration()
+	if dur > (7*time.Minute) || dur < (30*time.Second) {
+		return false
+	}
+
+	if !r.includesClient(track.AddedBy.ID) {
+		return false
+	}
+
+	return true
 }
 
 func (r *Room) getCurrentAndRemoveOldPlaylistTracks(client *spotify.Client, prev spotify.PlaylistTrack) (current spotify.PlaylistTrack) {
@@ -74,7 +84,7 @@ func (r *Room) getCurrentAndRemoveOldPlaylistTracks(client *spotify.Client, prev
 
 	var trackIDs []spotify.ID
 	for _, track := range *tracks {
-		if r.includesClient(track.AddedBy.ID) {
+		if r.okTrack(track) {
 			continue
 		}
 
