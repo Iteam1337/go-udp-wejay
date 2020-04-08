@@ -136,20 +136,21 @@ func (u *User) getActiveDevice() (current spotify.PlayerDevice, ok bool) {
 
 func (u *User) handlePlayerState() {
 	ps, err := u.client.PlayerState()
-	if err != nil {
-		log.Println("cant get playerState", err)
+	if err != nil || ps == nil {
 		return
 	}
 
 	if ps.ShuffleState {
 		if err := u.client.Shuffle(false); err != nil {
-			log.Println("can't unshuffle", err)
+			// log.Println("can't unshuffle", err)
+			return
 		}
 	}
 
 	if ps.RepeatState != "off" {
 		if err := u.client.Repeat("off"); err != nil {
-			log.Println("can't set repeat state", err)
+			// log.Println("can't set repeat state", err)
+			return
 		}
 	}
 }
