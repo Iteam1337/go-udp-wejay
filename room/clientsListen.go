@@ -17,7 +17,7 @@ func (r *Room) clientsListen() {
 			break
 		}
 
-		client := r.owner.GetClient()
+		client := r.getOwnerClient()
 		if client == nil {
 			time.Sleep(2 * time.Second)
 			continue

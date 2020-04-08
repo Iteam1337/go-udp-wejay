@@ -2,6 +2,7 @@ package room
 
 import (
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/Iteam1337/go-udp-wejay/utils"
@@ -22,6 +23,25 @@ func (r *Room) destroy() {
 	utils.SetNil(&r.owner)
 	utils.SetNil(&r.elapsed)
 	utils.SetNil(&r.update)
+}
+
+func (r *Room) getOwnerClient() (client *spotify.Client) {
+	ownerID := r.playlist.Owner.ID
+
+	for _, user := range r.users {
+		if string(user.ClientID) != ownerID {
+			continue
+		}
+
+		client = user.GetClient()
+		break
+	}
+
+	if client == nil {
+		log.Printf(`[%s] no client`, r.id)
+	}
+
+	return
 }
 
 func (r *Room) promoteNewOwner() {

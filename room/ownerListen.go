@@ -49,9 +49,8 @@ func (r *Room) ownerListen() {
 			break
 		}
 
-		client := r.owner.GetClient()
+		client := r.getOwnerClient()
 		if client == nil {
-			log.Printf(`[%s] no client`, r.id)
 			sleep()
 			continue
 		}
