@@ -22,7 +22,6 @@ func (r *Room) updateUser(u *user.User, wg *sync.WaitGroup) {
 	}
 
 	if ps.CurrentlyPlaying.Item == nil {
-		log.Printf("[%s](%s) nothing is playing", r.id, u.ClientID)
 		return
 	}
 
