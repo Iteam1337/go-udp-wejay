@@ -17,7 +17,7 @@ func (r *Room) updateUser(u *user.User, wg *sync.WaitGroup) {
 	}
 
 	ps, err := client.PlayerState()
-	if err != nil || ps == nil || !ps.Playing {
+	if err != nil || ps == nil || !ps.Playing || ps.Device.Restricted {
 		return
 	}
 

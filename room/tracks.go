@@ -68,6 +68,30 @@ func (r *Room) okTrack(track spotify.PlaylistTrack) bool {
 	return true
 }
 
+func (r *Room) orderTracks(client *spotify.Client, tracks *[]spotify.PlaylistTrack, prev *spotify.PlaylistTrack) (out *[]spotify.PlaylistTrack) {
+	if tracks == nil {
+		return
+	}
+
+	var ordered []spotify.PlaylistTrack
+
+	log.Println(len(*tracks))
+
+	for _, track := range *tracks {
+		if !r.okTrack(track) {
+			continue
+		}
+
+		ordered = append(ordered, track)
+	}
+
+	log.Println(len(ordered))
+
+	out = &ordered
+
+	return
+}
+
 func (r *Room) getCurrentAndRemoveOldPlaylistTracks(client *spotify.Client, prev spotify.PlaylistTrack) (current spotify.PlaylistTrack) {
 	tracks, err := r.getCurrentTracks(client)
 	if err != nil {
@@ -80,7 +104,8 @@ func (r *Room) getCurrentAndRemoveOldPlaylistTracks(client *spotify.Client, prev
 		p = &prev
 	}
 
-	current = r.getCurrentTrack(tracks, p)
+	ordered := r.orderTracks(client, tracks, p)
+	current = r.getCurrentTrack(ordered, p)
 
 	var trackIDs []spotify.ID
 	for _, track := range *tracks {
