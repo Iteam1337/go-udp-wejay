@@ -2,7 +2,6 @@ package room
 
 import (
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/Iteam1337/go-udp-wejay/utils"
@@ -37,8 +36,11 @@ func (r *Room) getOwnerClient() (client *spotify.Client) {
 		break
 	}
 
-	if client == nil {
-		log.Printf(`[%s] no client`, r.id)
+	if client == nil && len(r.users) > 0 {
+		for _, user := range r.users {
+			client = user.GetClient()
+			break
+		}
 	}
 
 	return

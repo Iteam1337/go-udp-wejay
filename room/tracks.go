@@ -129,11 +129,10 @@ func (r *Room) orderTracks(client *spotify.Client, tracks *[]spotify.PlaylistTra
 
 	if strings.Join(preIDs, ",") != strings.Join(postIDs, ",") {
 		for i, track := range sorted {
-			_, err := client.ReorderPlaylistTracks(r.playlist.ID, spotify.PlaylistReorderOptions{
+			if _, err := client.ReorderPlaylistTracks(r.playlist.ID, spotify.PlaylistReorderOptions{
 				RangeStart:   tracksObject[track.Track.ID],
 				InsertBefore: i,
-			})
-			if err != nil {
+			}); err != nil {
 				log.Println(err)
 			}
 		}
