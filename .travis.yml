@@ -17,8 +17,8 @@ jobs:
       language: minimal
       env:
         - NAMESPACE="wejay"
-        - DEPLOYMENT="go-wejay"
-        - CONTAINER="go-wejay"
+        - DEPLOYMENT="go-udp-wejay"
+        - CONTAINER="go-udp-wejay"
         - DEPLOY_SCRIPT="https://gist.githubusercontent.com/ankjevel/fc444cdb248287a97242ced271ece388/raw/69f469562ebe46ef15e066fc574d5d865a5e83ee/deploy.sh"
       script:
         - export REPO="${TRAVIS_REPO_SLUG,,}"
