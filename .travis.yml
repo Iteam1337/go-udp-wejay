@@ -3,7 +3,6 @@ dist: bionic
 jobs:
   include:
     - stage: test
-      dist: bionic
       language: go
       go: "1.13.10"
       script: go test -gcflags=-l -v ./...
