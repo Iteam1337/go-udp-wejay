@@ -167,6 +167,7 @@ func (u *User) loopState() {
 
 		if _, ok := u.getActiveDevice(); ok {
 			go u.handlePlayerState()
+			break
 		}
 
 		sleep()
