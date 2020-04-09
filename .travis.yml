@@ -15,7 +15,18 @@ jobs:
         - docker build -t $REPO:latest .
         - docker push $REPO:latest
 
-    - stage: build_and_deploy_tag
+    - stage: build_tag
+      language: minimal
+      script:
+        - export REPO="${TRAVIS_REPO_SLUG,,}"
+        - export TAG="${TRAVIS_TAG/v/}"
+        - docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"
+        - docker build -t $REPO:latest-tag-release .
+        - docker tag $REPO:latest-tag-release $REPO:$TAG
+        - docker push $REPO:latest-tag-release
+        - docker push $REPO:$TAG
+
+    - stage: deploy_tag
       language: minimal
       env:
         - NAMESPACE="wejay"
@@ -25,18 +36,15 @@ jobs:
       script:
         - export REPO="${TRAVIS_REPO_SLUG,,}"
         - export TAG="${TRAVIS_TAG/v/}"
-        - docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"
-        - docker build -t $REPO:latest-tag-release .
-        - docker tag $REPO:latest-tag-release $REPO:$TAG
-        - docker push $REPO:latest-tag-release
-        - docker push $REPO:$TAG
         - source <(curl "$DEPLOY_SCRIPT" -s 2>&1)
 
 stages:
   - name: test
   - name: build
     if: branch = master AND type != pull_request AND tag !~ /^v/
-  - name: build_and_deploy_tag
+  - name: build_tag
+    if: tag =~ /^v/
+  - name: deploy_tag
     if: tag =~ /^v/
 
 notifications:
