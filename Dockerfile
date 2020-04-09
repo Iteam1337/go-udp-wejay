@@ -19,14 +19,13 @@ ENV \
     SPOTIFY_ID= \
     # SPOTIFY_SECRET= \
     SPOTIFY_SECRET= \
-    # ADDR=:8090 \
-    ADDR= \
     # STORE_STATE=1 \
     STORE_STATE= \
     # SAVE_STATE_LOCATION=/tmp/wejay \
     SAVE_STATE_LOCATION= \
     # GEN_COVER=localhost:8091
-    GEN_COVER=
+    GEN_COVER= \
+    ADDR=0.0.0.0:8090
 
 EXPOSE 8090/udp
 
