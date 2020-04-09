@@ -1,7 +1,11 @@
 jobs:
   include:
     - stage: test
-      language: minimal
+      dist: bionic
+      language: go
+      env: GO111MODULE=on GOFLAGS='-mod vendor'
+      go:
+        - 1.13.x
       script:
         - make tests
 
